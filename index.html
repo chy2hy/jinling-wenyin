@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>金陵纹影 · 南京云锦数字化3D交互展</title>
+    <style>
+        /* ===== 全局 ===== */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { overflow: hidden; background: #0a0806; font-family: "Noto Serif SC", "宋体", serif; }
+
+        #canvas-container { width: 100vw; height: 100vh; display: block; }
+
+        /* ===== HUD 信息面板 ===== */
+        #hud {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            z-index: 10; text-align: center; pointer-events: none;
+            opacity: 0; transition: opacity 1.5s ease;
+        }
+        #hud.show { opacity: 1; }
+        #hud h1 {
+            font-size: 28px; font-weight: 400; letter-spacing: 8px;
+            color: #d4a853; text-shadow: 0 2px 20px rgba(212,168,83,0.3);
+        }
+        #hud p {
+            font-size: 13px; color: rgba(255,255,255,0.5);
+            letter-spacing: 4px; margin-top: 4px;
+        }
+
+        /* ===== 左侧信息卡 ===== */
+        #info-card {
+            position: fixed; left: 40px; top: 50%; transform: translateY(-50%);
+            z-index: 10; max-width: 320px;
+            background: linear-gradient(135deg, rgba(10,8,6,0.85), rgba(30,20,10,0.8));
+            border: 1px solid rgba(212,168,83,0.25); border-radius: 12px;
+            padding: 28px 24px; backdrop-filter: blur(12px);
+            opacity: 0; transition: opacity 0.6s ease, transform 0.6s ease;
+            pointer-events: none;
+        }
+        #info-card.show { opacity: 1; pointer-events: auto; }
+        #info-card .title {
+            font-size: 22px; color: #d4a853; letter-spacing: 3px;
+            margin-bottom: 8px; font-weight: 400;
+        }
+        #info-card .subtitle {
+            font-size: 13px; color: rgba(255,255,255,0.4); letter-spacing: 2px;
+            margin-bottom: 14px; padding-bottom: 14px;
+            border-bottom: 1px solid rgba(212,168,83,0.15);
+        }
+        #info-card .desc {
+            font-size: 14px; color: rgba(255,255,255,0.7); line-height: 1.8;
+            letter-spacing: 0.5px;
+        }
+        #info-card .close-btn {
+            position: absolute; top: 12px; right: 16px;
+            background: none; border: none; color: rgba(255,255,255,0.3);
+            font-size: 18px; cursor: pointer; pointer-events: auto;
+        }
+        #info-card .close-btn:hover { color: #d4a853; }
+
+        /* ===== 底部操作提示 ===== */
+        #controls-hint {
+            position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%);
+            z-index: 10; text-align: center;
+            color: rgba(255,255,255,0.25); font-size: 12px; letter-spacing: 2px;
+            opacity: 0; transition: opacity 1.5s ease;
+        }
+        #controls-hint.show { opacity: 1; }
+
+        /* ===== 加载画面 ===== */
+        #loader {
+            position: fixed; inset: 0; z-index: 999;
+            background: #0a0806; display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            transition: opacity 1s ease;
+        }
+        #loader.hide { opacity: 0; pointer-events: none; }
+        #loader .spinner {
+            width: 48px; height: 48px; border: 2px solid rgba(212,168,83,0.15);
+            border-top-color: #d4a853; border-radius: 50%;
+            animation: spin 1.2s cubic-bezier(0.4,0.0,0.2,1) infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        #loader p {
+            margin-top: 20px; color: rgba(212,168,83,0.7);
+            font-size: 14px; letter-spacing: 6px;
+        }
+
+        /* ===== 顶部导航 ===== */
+        #nav {
+            position: fixed; top: 80px; left: 50%; transform: translateX(-50%);
+            z-index: 10; display: flex; gap: 8px; pointer-events: none;
+            opacity: 0; transition: opacity 1s ease;
+        }
+        #nav.show { opacity: 1; }
+        #nav button {
+            pointer-events: auto;
+            background: rgba(212,168,83,0.1); border: 1px solid rgba(212,168,83,0.2);
+            color: rgba(255,255,255,0.6); padding: 6px 18px; border-radius: 20px;
+            font-size: 12px; letter-spacing: 1px; cursor: pointer;
+            font-family: inherit; transition: all 0.3s ease;
+        }
+        #nav button:hover { background: rgba(212,168,83,0.25); color: #d4a853; border-color: rgba(212,168,83,0.4); }
+        #nav button.active { background: rgba(212,168,83,0.2); color: #d4a853; border-color: #d4a853; }
+
+        @media (max-width: 768px) {
+            #info-card { left: 16px; right: 16px; max-width: none; top: auto; bottom: 100px; transform: none; }
+            #hud h1 { font-size: 20px; letter-spacing: 4px; }
+            #nav { top: 70px; flex-wrap: wrap; justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- 加载画面 -->
+<div id="loader">
+    <div class="spinner"></div>
+    <p>金陵纹影 · 加载中</p>
+</div>
+
+<!-- HUD -->
+<div id="hud"><h1>金陵纹影</h1><p>南京云锦 · 数字化3D交互展</p></div>
+
+<!-- 导航 -->
+<div id="nav">
+    <button class="active" data-id="0">云锦溯源</button>
+    <button data-id="1">纹样典藏</button>
+    <button data-id="2">织造技艺</button>
+    <button data-id="3">AI新创</button>
+</div>
+
+<!-- 信息卡 -->
+<div id="info-card">
+    <button class="close-btn" id="close-info">✕</button>
+    <div class="title" id="info-title"></div>
+    <div class="subtitle" id="info-subtitle"></div>
+    <div class="desc" id="info-desc"></div>
+</div>
+
+<!-- 底部提示 -->
+<div id="controls-hint">🖱 拖拽旋转 · 滚轮缩放 · 点击展品了解详情</div>
+
+<!-- 3D 容器 -->
+<div id="canvas-container"></div>
+
+<!-- Three.js CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+<script>
+// ============================================================
+//  数据
+// ============================================================
+const EXHIBITS = [
+    {
+        id: 0, title: "云锦溯源",
+        subtitle: "世界非物质文化遗产",
+        desc: "南京云锦，因其绚丽多姿、灿若云霞而得名，至今已有近1600年历史。2009年被联合国教科文组织列入《人类非物质文化遗产代表作名录》。云锦与成都蜀锦、苏州宋锦并称中国三大名锦，而云锦以其独特的妆花工艺居首。",
+        color: 0xd4a853, pos: [-6, 0, 0]
+    },
+    {
+        id: 1, title: "龙凤呈祥",
+        subtitle: "经典纹样 · 明代万历",
+        desc: "云锦经典纹样，以龙、凤为主体，辅以祥云、花卉。龙代表权威尊贵，凤象征吉祥和谐。妆花工艺使图案层次丰富、金彩交辉，是云锦最具代表性的纹样之一。",
+        color: 0xcd3333, pos: [0, 0, 0]
+    },
+    {
+        id: 2, title: "织造技艺",
+        subtitle: "挑花结本 · 通经断纬",
+        desc: "云锦使用传统的提花木机织造，由两人配合完成。挑花结本相当于编程，通经断纬技术则使图案色彩丰富、过渡自然。一名熟练织工一天仅能织造5-6厘米，可谓寸锦寸金。",
+        color: 0x8b6914, pos: [6, 0, 0]
+    },
+    {
+        id: 3, title: "AI 新创",
+        subtitle: "AI 生成 · 传统新生",
+        desc: "基于传统云锦纹样训练，AI通过学习云锦的色彩搭配、构图规律，生成全新的现代云锦纹样设计。传统与科技融合，让千年云锦焕发新生。点击按钮即可生成属于你的云锦纹样。",
+        color: 0x6b8e23, pos: [0, 0, 6]
+    }
+];
+
+// ============================================================
+//  Three.js 场景
+// ============================================================
+const container = document.getElementById('canvas-container');
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0a0806);
+scene.fog = new THREE.Fog(0x0a0806, 15, 25);
+
+const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 50);
+camera.position.set(8, 5, 12);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.2;
+container.appendChild(renderer.domElement);
+
+// 控制器
+const controls = new THREE.OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.05;
+controls.minDistance = 4;
+controls.maxDistance = 20;
+controls.maxPolarAngle = Math.PI / 2.1;
+controls.target.set(0, 0.5, 0);
+
+// ============================================================
+//  灯光
+// ============================================================
+const ambient = new THREE.AmbientLight(0x332211, 0.4);
+scene.add(ambient);
+
+const mainLight = new THREE.DirectionalLight(0xffd5a0, 1);
+mainLight.position.set(5, 10, 7);
+mainLight.castShadow = true;
+scene.add(mainLight);
+
+const fillLight = new THREE.DirectionalLight(0x4488ff, 0.3);
+fillLight.position.set(-5, 3, -5);
+scene.add(fillLight);
+
+const rimLight = new THREE.DirectionalLight(0xd4a853, 0.5);
+rimLight.position.set(-3, 2, 8);
+scene.add(rimLight);
+
+// 点光柱
+const spotLight = new THREE.SpotLight(0xd4a853, 0.6, 15, Math.PI / 6, 0.5);
+spotLight.position.set(0, 8, 0);
+spotLight.target.position.set(0, 0, 0);
+scene.add(spotLight);
+scene.add(spotLight.target);
+
+// ============================================================
+//  地面
+// ============================================================
+const floorGeo = new THREE.PlaneGeometry(30, 30);
+const floorMat = new THREE.MeshStandardMaterial({
+    color: 0x1a1410, roughness: 0.7, metalness: 0.1,
+    transparent: true, opacity: 0.9
+});
+const floor = new THREE.Mesh(floorGeo, floorMat);
+floor.rotation.x = -Math.PI / 2;
+floor.receiveShadow = true;
+scene.add(floor);
+
+// 地砖网格线
+const gridHelper = new THREE.GridHelper(24, 16, 0xd4a853, 0xd4a853);
+gridHelper.material.transparent = true;
+gridHelper.material.opacity = 0.08;
+scene.add(gridHelper);
+
+// ============================================================
+//  展台 — 中心四面展示柱
+// ============================================================
+function createPillar(x, z, color, height = 2.8) {
+    const group = new THREE.Group();
+
+    // 底座
+    const baseGeo = new THREE.CylinderGeometry(0.7, 0.9, 0.2, 8);
+    const baseMat = new THREE.MeshStandardMaterial({
+        color: 0x2a1f14, roughness: 0.6, metalness: 0.3
+    });
+    const base = new THREE.Mesh(baseGeo, baseMat);
+    base.position.y = 0.1;
+    base.receiveShadow = true;
+    base.castShadow = true;
+    group.add(base);
+
+    // 柱身
+    const pillarGeo = new THREE.CylinderGeometry(0.25, 0.3, height, 8);
+    const pillarMat = new THREE.MeshStandardMaterial({
+        color: 0x3a2a1a, roughness: 0.5, metalness: 0.2
+    });
+    const pillar = new THREE.Mesh(pillarGeo, pillarMat);
+    pillar.position.y = height / 2 + 0.1;
+    pillar.castShadow = true;
+    group.add(pillar);
+
+    // 顶托
+    const topGeo = new THREE.CylinderGeometry(0.4, 0.3, 0.15, 8);
+    const topMat = new THREE.MeshStandardMaterial({
+        color: 0x4a3a2a, roughness: 0.5, metalness: 0.2
+    });
+    const top = new THREE.Mesh(topGeo, topMat);
+    top.position.y = height + 0.15;
+    top.castShadow = true;
+    group.add(top);
+
+    group.position.set(x, 0, z);
+    return group;
+}
+
+// ============================================================
+//  展品 — 3D 纹样展板 (围廊式布局)
+// ============================================================
+function createCanvasPattern(text, color, isAI = false) {
+    const canvas = document.createElement('canvas');
+    canvas.width = 512; canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+
+    // 底色 — 仿古绢本
+    const gradient = ctx.createRadialGradient(256, 256, 0, 256, 256, 300);
+    gradient.addColorStop(0, isAI ? '#1a2a10' : '#1a1410');
+    gradient.addColorStop(0.6, isAI ? '#0f1a08' : '#0f0a06');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, 512, 512);
+
+    // 暗纹底纹 — 传统几何纹路
+    ctx.strokeStyle = `rgba(212, 168, 83, 0.06)`;
+    ctx.lineWidth = 1;
+    for (let i = 0; i < 512; i += 32) {
+        ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, 512); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(512, i); ctx.stroke();
+    }
+
+    // 中心纹样
+    const cx = 256, cy = 256;
+
+    if (isAI) {
+        // AI 生成抽象纹样
+        const colors = ['#6b8e23', '#d4a853', '#cd3333', '#4a7a9c'];
+        for (let i = 0; i < 20; i++) {
+            const angle = (i / 20) * Math.PI * 2;
+            const r = 80 + 60 * Math.sin(i * 1.5);
+            const x = cx + r * Math.cos(angle);
+            const y = cy + r * Math.sin(angle);
+            ctx.fillStyle = colors[i % colors.length];
+            ctx.globalAlpha = 0.3 + 0.2 * Math.sin(i);
+            ctx.beginPath();
+            ctx.arc(x, y, 12 + 8 * Math.sin(i * 2), 0, Math.PI * 2);
+            ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+    } else {
+        // 传统云锦纹样 — 团花 + 缠枝
+        const mainColor = new THREE.Color(color);
+        const hex = '#' + mainColor.getHexString();
+
+        // 外圈 — 缠枝
+        for (let i = 0; i < 12; i++) {
+            const angle = (i / 12) * Math.PI * 2;
+            const r = 140;
+            const x = cx + r * Math.cos(angle);
+            const y = cy + r * Math.sin(angle);
+            ctx.beginPath();
+            ctx.ellipse(x, y, 30, 18, angle, 0, Math.PI * 2);
+            ctx.strokeStyle = hex; ctx.globalAlpha = 0.3;
+            ctx.lineWidth = 2; ctx.stroke();
+            // 小花瓣
+            ctx.fillStyle = hex; ctx.globalAlpha = 0.15;
+            ctx.fill();
+        }
+
+        // 内圈 — 八瓣团花
+        for (let i = 0; i < 8; i++) {
+            const angle = (i / 8) * Math.PI * 2 - Math.PI / 2;
+            const r = 75;
+            const petalX = cx + r * Math.cos(angle);
+            const petalY = cy + r * Math.sin(angle);
+            ctx.save();
+            ctx.translate(petalX, petalY);
+            ctx.rotate(angle);
+            ctx.beginPath();
+            ctx.ellipse(0, 0, 40, 20, 0, 0, Math.PI * 2);
+            ctx.fillStyle = hex; ctx.globalAlpha = 0.25;
+            ctx.fill();
+            ctx.strokeStyle = hex; ctx.globalAlpha = 0.5;
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        // 圆心
+        const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 30);
+        grad.addColorStop(0, hex); grad.addColorStop(1, hex + '00');
+        ctx.fillStyle = grad; ctx.globalAlpha = 0.6;
+        ctx.beginPath(); ctx.arc(cx, cy, 30, 0, Math.PI * 2); ctx.fill();
+
+        ctx.globalAlpha = 1;
+    }
+
+    // 标题文字
+    ctx.fillStyle = 'rgba(212,168,83,0.8)';
+    ctx.font = '24px "SimSun", serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'bottom';
+    ctx.fillText(text, 256, 490);
+
+    return canvas;
+}
+
+function createTextureFromCanvas(canvas) {
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+    tex.repeat.set(1, 1);
+    tex.anisotropy = 4;
+    return tex;
+}
+
+// 展板尺寸
+const PANEL_W = 2.8;
+const PANEL_H = 2.8;
+const PANEL_GAP = 0.15;
+
+// 展板位置 — 矩形围廊
+const PANEL_POSITIONS = [
+    { x: -6, z: 0, ry: 0 },      // 正面 1
+    { x: 0, z: 0, ry: 0 },       // 正面 2
+    { x: 6, z: 0, ry: 0 },       // 正面 3
+    { x: 6, z: 5, ry: -Math.PI / 2 }, // 右面 1
+    { x: 0, z: 5, ry: -Math.PI / 2 }, // 右面 2
+    { x: -6, z: 5, ry: -Math.PI / 2 }, // 右面 3
+    { x: -6, z: 10, ry: Math.PI },     // 背面
+    { x: 0, z: 10, ry: Math.PI },
+    { x: 6, z: 10, ry: Math.PI },
+    { x: -6, z: 15, ry: Math.PI / 2 }, // 左面 1 (z轴正)
+    { x: 0, z: 15, ry: Math.PI / 2 },
+    { x: 6, z: 15, ry: Math.PI / 2 },
+];
+
+const PANEL_TEXTS = [
+    "云锦溯源", "龙凤呈祥", "织造技艺",
+    "鱼戏莲", "五福捧寿", "富贵牡丹",
+    "八宝纹", "祥云瑞彩", "海水江崖",
+    "AI 新创", "AI 新创", "AI 新创"
+];
+
+const PANEL_COLORS = [
+    0xd4a853, 0xcd3333, 0x8b6914,
+    0x4a7a9c, 0x6b8e23, 0xcd5c5c,
+    0x8b6914, 0x6b8e23, 0x4a7a9c,
+    0x6b8e23, 0x6b8e23, 0x6b8e23
+];
+
+const IS_AI_PANELS = [false, false, false, false, false, false, false, false, false, true, true, true];
+
+const panels = [];
+const panelGroups = [];
+
+PANEL_POSITIONS.forEach((pos, i) => {
+    const group = new THREE.Group();
+
+    // 画框
+    const frameMat = new THREE.MeshStandardMaterial({
+        color: 0x3a2a1a, roughness: 0.6, metalness: 0.3
+    });
+    const frameDepth = 0.08;
+    const frameW = PANEL_W + 0.2;
+    const frameH = PANEL_H + 0.2;
+
+    // 边框 — 四条
+    const barMat = new THREE.MeshStandardMaterial({
+        color: 0x5a3a1a, roughness: 0.5, metalness: 0.4
+    });
+
+    const createBar = (w, h, dx, dy) => {
+        const g = new THREE.BoxGeometry(w, h, frameDepth);
+        const m = new THREE.Mesh(g, barMat);
+        m.position.set(dx, dy, 0);
+        m.castShadow = true;
+        return m;
+    };
+
+    group.add(createBar(frameW, 0.06, 0, frameH / 2));
+    group.add(createBar(frameW, 0.06, 0, -frameH / 2));
+    group.add(createBar(0.06, frameH, -frameW / 2, 0));
+    group.add(createBar(0.06, frameH, frameW / 2, 0));
+
+    // 画布
+    const canvas2 = createCanvasPattern(PANEL_TEXTS[i], PANEL_COLORS[i], IS_AI_PANELS[i]);
+    const tex = createTextureFromCanvas(canvas2);
+    const panelMat = new THREE.MeshStandardMaterial({
+        map: tex, roughness: 0.6, metalness: 0.05,
+        emissive: new THREE.Color(0xd4a853), emissiveIntensity: 0.05
+    });
+    const panel = new THREE.Mesh(
+        new THREE.PlaneGeometry(PANEL_W, PANEL_H),
+        panelMat
+    );
+    panel.position.z = 0.01;
+    panel.castShadow = false;
+    group.add(panel);
+
+    // 发光背景
+    const glowMat = new THREE.MeshBasicMaterial({
+        color: PANEL_COLORS[i], transparent: true, opacity: 0.04
+    });
+    const glow = new THREE.Mesh(
+        new THREE.PlaneGeometry(PANEL_W + 0.3, PANEL_H + 0.3),
+        glowMat
+    );
+    glow.position.z = -0.02;
+    group.add(glow);
+
+    group.position.set(pos.x, 1.5, pos.z);
+    group.rotation.y = pos.ry;
+
+    scene.add(group);
+    panelGroups.push(group);
+    panels.push(panel);
+});
+
+// ============================================================
+//  柱体
+// ============================================================
+const pillarPositions = [
+    [-7.8, -1.5], [-3, -1.5], [3, -1.5], [7.8, -1.5],
+    [-7.8, 4.5], [-3, 4.5], [3, 4.5], [7.8, 4.5],
+    [-7.8, 10.5], [-3, 10.5], [3, 10.5], [7.8, 10.5],
+];
+pillarPositions.forEach(p => {
+    const pillar = createPillar(p[0], p[1], 0x3a2a1a);
+    scene.add(pillar);
+});
+
+// ============================================================
+//  顶部 — 中式屋顶示意
+// ============================================================
+function createRoof() {
+    const group = new THREE.Group();
+
+    // 横梁
+    const beamMat = new THREE.MeshStandardMaterial({
+        color: 0x2a1a0a, roughness: 0.7, metalness: 0.1
+    });
+    for (let i = -8; i <= 8; i += 4) {
+        const b1 = new THREE.Mesh(new THREE.BoxGeometry(20, 0.08, 0.12), beamMat);
+        b1.position.set(0, 5.0, i); group.add(b1);
+        const b2 = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.08, 20), beamMat);
+        b2.position.set(i, 5.0, 0); group.add(b2);
+    }
+
+    // 顶棚发光 — 中式灯笼效果
+    const glowCanvas = document.createElement('canvas');
+    glowCanvas.width = 256; glowCanvas.height = 256;
+    const gctx = glowCanvas.getContext('2d');
+    const grad = gctx.createRadialGradient(128, 128, 0, 128, 128, 128);
+    grad.addColorStop(0, '#d4a853'); grad.addColorStop(0.3, '#d4a85333');
+    grad.addColorStop(1, '#d4a85300');
+    gctx.fillStyle = grad; gctx.fillRect(0, 0, 256, 256);
+    const glowTex = new THREE.CanvasTexture(glowCanvas);
+
+    const ceilGlow = new THREE.Mesh(
+        new THREE.PlaneGeometry(16, 12),
+        new THREE.MeshBasicMaterial({ map: glowTex, transparent: true, opacity: 0.3, depthWrite: false })
+    );
+    ceilGlow.rotation.x = -Math.PI / 2;
+    ceilGlow.position.set(0, 4.9, 2);
+    group.add(ceilGlow);
+
+    group.position.y = 0;
+    return group;
+}
+scene.add(createRoof());
+
+// ============================================================
+//  粒子 — 飘浮金粉
+// ============================================================
+const particleCount = 800;
+const particlesGeo = new THREE.BufferGeometry();
+const positions = new Float32Array(particleCount * 3);
+const sizes = new Float32Array(particleCount);
+
+for (let i = 0; i < particleCount; i++) {
+    positions[i * 3] = (Math.random() - 0.5) * 30;
+    positions[i * 3 + 1] = Math.random() * 6;
+    positions[i * 3 + 2] = (Math.random() - 0.5) * 30;
+    sizes[i] = 0.02 + Math.random() * 0.04;
+}
+
+particlesGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+particlesGeo.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+
+const particleTex = (() => {
+    const c = document.createElement('canvas'); c.width = 32; c.height = 32;
+    const ctx = c.getContext('2d');
+    const g = ctx.createRadialGradient(16, 16, 0, 16, 16, 16);
+    g.addColorStop(0, 'rgba(212,168,83,1)');
+    g.addColorStop(0.3, 'rgba(212,168,83,0.5)');
+    g.addColorStop(1, 'rgba(212,168,83,0)');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, 32, 32);
+    return new THREE.CanvasTexture(c);
+})();
+
+const particleMat = new THREE.PointsMaterial({
+    map: particleTex, size: 0.12, transparent: true, opacity: 0.6,
+    blending: THREE.AdditiveBlending, depthWrite: false,
+    color: 0xd4a853
+});
+const particles = new THREE.Points(particlesGeo, particleMat);
+scene.add(particles);
+
+// ============================================================
+//  Raycaster 交互
+// ============================================================
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+let selectedPanel = null;
+
+function onPointerDown(event) {
+    const rect = renderer.domElement.getBoundingClientRect();
+    mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+    raycaster.setFromCamera(mouse, camera);
+
+    // 只检测面板本身
+    const meshes = [];
+    panelGroups.forEach((g, idx) => {
+        g.children.forEach(child => {
+            if (child.isMesh && child.geometry.type === 'PlaneGeometry' && child.material.map) {
+                meshes.push({ mesh: child, idx });
+            }
+        });
+    });
+
+    const meshList = meshes.map(m => m.mesh);
+    const intersects = raycaster.intersectObjects(meshList);
+
+    if (intersects.length > 0) {
+        const hit = intersects[0].object;
+        const entry = meshes.find(m => m.mesh === hit);
+        if (entry !== undefined) {
+            const dataIdx = Math.min(entry.idx, EXHIBITS.length - 1);
+            showInfo(dataIdx);
+        }
+    }
+}
+
+renderer.domElement.addEventListener('click', onPointerDown);
+renderer.domElement.style.cursor = 'pointer';
+
+// ============================================================
+//  UI 交互
+// ============================================================
+const infoCard = document.getElementById('info-card');
+const infoTitle = document.getElementById('info-title');
+const infoSubtitle = document.getElementById('info-subtitle');
+const infoDesc = document.getElementById('info-desc');
+
+function showInfo(idx) {
+    const ex = EXHIBITS[idx] || EXHIBITS[0];
+    infoTitle.textContent = ex.title;
+    infoSubtitle.textContent = ex.subtitle;
+    infoDesc.textContent = ex.desc;
+    infoCard.classList.add('show');
+
+    // 高亮对应展板
+    panels.forEach((p, i) => {
+        const targetIdx = Math.min(i, EXHIBITS.length - 1);
+        if (targetIdx === idx) {
+            p.material.emissiveIntensity = 0.2;
+        } else {
+            p.material.emissiveIntensity = 0.05;
+        }
+    });
+}
+
+document.getElementById('close-info').addEventListener('click', () => {
+    infoCard.classList.remove('show');
+    panels.forEach(p => p.material.emissiveIntensity = 0.05);
+});
+
+// 导航按钮
+document.querySelectorAll('#nav button').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('#nav button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const idx = parseInt(btn.dataset.id);
+        showInfo(idx);
+        // 移向对应展品
+        const ex = EXHIBITS[idx];
+        if (ex) {
+            controls.target.set(ex.pos[0], ex.pos[1] + 0.5, ex.pos[2]);
+        }
+    });
+});
+
+// ============================================================
+//  窗口适配
+// ============================================================
+window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+// ============================================================
+//  动画循环
+// ============================================================
+const clock = new THREE.Clock();
+
+function animate() {
+    requestAnimationFrame(animate);
+
+    const t = clock.getElapsedTime();
+
+    // 粒子飘浮
+    const pos = particles.geometry.attributes.position.array;
+    for (let i = 0; i < particleCount; i++) {
+        pos[i * 3 + 1] += Math.sin(t * 0.3 + i) * 0.0005;
+        if (pos[i * 3 + 1] > 6) pos[i * 3 + 1] = 0;
+    }
+    particles.geometry.attributes.position.needsUpdate = true;
+
+    // 展板微光脉动
+    panels.forEach((p, i) => {
+        const pulse = 0.04 + 0.02 * Math.sin(t * 0.8 + i * 0.5);
+        if (p.material.emissiveIntensity <= 0.06) {
+            p.material.emissiveIntensity = pulse;
+        }
+    });
+
+    controls.update();
+    renderer.render(scene, camera);
+}
+
+// ============================================================
+//  启动
+// ============================================================
+setTimeout(() => {
+    document.getElementById('loader').classList.add('hide');
+    document.getElementById('hud').classList.add('show');
+    document.getElementById('nav').classList.add('show');
+    document.getElementById('controls-hint').classList.add('show');
+}, 1500);
+
+animate();
+
+console.log('🏮 金陵纹影 · 南京云锦数字化3D交互展');
+console.log('📌 点击展板查看详情 | 拖拽旋转 | 滚轮缩放');
+</script>
+</body>
+</html>
