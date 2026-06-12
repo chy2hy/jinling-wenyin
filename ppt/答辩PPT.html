@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>金陵纹影 · 答辩PPT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700;900&family=ZCOOL+XiaoWei&family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
+<style>
+@page{size:1024px 768px;margin:0}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+    font-family:'Noto Serif SC','ZCOOL XiaoWei',serif;
+    background:#080604;color:rgba(255,255,255,0.85);
+    width:100vw;height:100vh;overflow:hidden;
+    display:flex;flex-direction:column;
+}
+.slide-container{
+    flex:1;display:flex;align-items:center;justify-content:center;
+    position:relative;overflow:hidden;
+}
+/* 背景装饰 */
+.bg-ornament{
+    position:absolute;inset:0;pointer-events:none;overflow:hidden;
+}
+.bg-ornament::before{
+    content:'';position:absolute;top:-30%;right:-10%;
+    width:500px;height:500px;
+    background:radial-gradient(circle,rgba(212,168,83,0.04),transparent 70%);
+    border-radius:50%;
+}
+.bg-ornament::after{
+    content:'';position:absolute;bottom:-20%;left:-10%;
+    width:400px;height:400px;
+    background:radial-gradient(circle,rgba(205,51,51,0.03),transparent 70%);
+    border-radius:50%;
+}
+.corner-deco{
+    position:absolute;width:80px;height:80px;border-color:rgba(212,168,83,0.12);border-style:solid;pointer-events:none;
+}
+.corner-deco.tl{top:30px;left:30px;border-width:1px 0 0 1px}
+.corner-deco.tr{top:30px;right:30px;border-width:1px 1px 0 0}
+.corner-deco.bl{bottom:30px;left:30px;border-width:0 0 1px 1px}
+.corner-deco.br{bottom:30px;right:30px;border-width:0 1px 1px 0}
+
+.slide{display:none;width:92%;max-width:960px;min-height:580px;padding:50px 60px;position:relative;z-index:1}
+.slide.active{display:block;animation:fadeIn 0.5s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+/* 封面 */
+.cover{text-align:center;padding-top:80px}
+.cover .main-title{font-size:60px;color:#d4a853;letter-spacing:16px;font-weight:900;margin-bottom:8px}
+.cover .main-title span{color:#cd3333}
+.cover .sub-title{font-size:20px;color:rgba(255,255,255,0.35);letter-spacing:8px;margin-bottom:40px}
+.cover .divider{width:240px;height:1px;background:linear-gradient(90deg,transparent,#d4a853,transparent);margin:0 auto 40px}
+.cover .info-table{display:inline-block;text-align:left;font-size:14px;letter-spacing:2px;line-height:2.4;color:rgba(255,255,255,0.5)}
+.cover .info-table td{padding:0 20px}
+.cover .info-table td:first-child{color:rgba(212,168,83,0.4)}
+.cover .info-table td:last-child{color:rgba(255,255,255,0.6)}
+.cover .bottom-deco{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);font-size:11px;color:rgba(255,255,255,0.12);letter-spacing:4px}
+
+/* 普通页 */
+.page-number{
+    position:absolute;bottom:30px;right:50px;
+    font-size:12px;color:rgba(212,168,83,0.2);letter-spacing:2px;
+}
+.slide-title{
+    font-size:32px;color:#d4a853;letter-spacing:6px;font-weight:700;margin-bottom:8px;
+}
+.slide-title-deco{
+    width:60px;height:2px;background:linear-gradient(90deg,#d4a853,transparent);margin-bottom:30px;
+}
+.slide-content{font-size:15px;line-height:2;color:rgba(255,255,255,0.7)}
+.slide-content .highlight{color:#d4a853}
+.slide-content .em{color:#cd3333}
+
+/* 双栏布局 */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:10px}
+.two-col .col h3{font-size:17px;color:#d4a853;letter-spacing:3px;margin-bottom:12px;font-weight:700}
+.two-col .col p{font-size:14px;line-height:2;color:rgba(255,255,255,0.65);margin-bottom:8px}
+.two-col .col ul{list-style:none;padding:0}
+.two-col .col li{padding:4px 0;font-size:14px;color:rgba(255,255,255,0.6);letter-spacing:1px;line-height:1.8}
+.two-col .col li::before{content:'◆ ';color:rgba(212,168,83,0.3);font-size:10px}
+
+/* 对比表 */
+.compare-table{width:100%;border-collapse:collapse;margin-top:12px;font-size:13px}
+.compare-table th{text-align:left;padding:10px 14px;color:#d4a853;border-bottom:1px solid rgba(212,168,83,0.1);letter-spacing:2px;font-weight:400}
+.compare-table td{padding:10px 14px;border-bottom:1px solid rgba(212,168,83,0.05);color:rgba(255,255,255,0.55);line-height:1.6}
+.compare-table td:first-child{color:rgba(212,168,83,0.5);width:25%}
+.compare-table td:nth-child(2){width:37%}
+.compare-table td:last-child{color:rgba(255,255,255,0.65)}
+
+/* 控制条 */
+#controls{
+    position:fixed;bottom:0;left:0;right:0;z-index:100;
+    display:flex;align-items:center;justify-content:center;gap:12px;
+    padding:12px;background:rgba(8,6,4,0.85);backdrop-filter:blur(12px);
+    border-top:1px solid rgba(212,168,83,0.06);
+}
+#controls button{
+    background:rgba(212,168,83,0.08);border:1px solid rgba(212,168,83,0.12);
+    color:rgba(255,255,255,0.5);padding:6px 18px;border-radius:16px;
+    cursor:pointer;font-family:inherit;font-size:12px;letter-spacing:1px;
+    transition:all 0.3s;
+}
+#controls button:hover{background:rgba(212,168,83,0.15);color:#d4a853}
+#controls .page-info{color:rgba(212,168,83,0.25);font-size:12px;letter-spacing:2px;min-width:80px;text-align:center}
+#controls .progress{width:200px;height:1px;background:rgba(255,255,255,0.05);border-radius:1px;overflow:hidden}
+#controls .progress-bar{height:100%;background:linear-gradient(90deg,#d4a853,#cd3333);transition:width 0.3s;border-radius:1px}
+#controls .key-hint{color:rgba(255,255,255,0.1);font-size:10px;letter-spacing:1px}
+
+/* 响应式 */
+@media(max-width:768px){
+    .slide{padding:30px 24px}
+    .cover .main-title{font-size:36px;letter-spacing:8px}
+    .slide-title{font-size:24px}
+    .two-col{grid-template-columns:1fr;gap:20px}
+    .compare-table{font-size:11px}
+    .compare-table th,.compare-table td{padding:6px 8px}
+    #controls .key-hint{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="slide-container">
+
+<!-- ============================== -->
+<!-- SLIDE 1: 封面 -->
+<!-- ============================== -->
+<div class="slide cover active" data-slide="0">
+    <div class="bg-ornament"></div>
+    <div class="corner-deco tl"></div><div class="corner-deco tr"></div>
+    <div class="corner-deco bl"></div><div class="corner-deco br"></div>
+
+    <div class="main-title">金陵<span>纹</span>影</div>
+    <div class="sub-title">南京云锦纹样的数字化三维重建与交互展示</div>
+    <div class="divider"></div>
+    <table class="info-table">
+        <tr><td>团 队</td><td>佳豪队</td></tr>
+        <tr><td>学 校</td><td>南京晓庄学院</td></tr>
+        <tr><td>赛 区</td><td>江苏赛区</td></tr>
+        <tr><td>赛 道</td><td>数字文化设计大赛</td></tr>
+    </table>
+    <div class="bottom-deco">— 科技赋能非遗 · 让云锦在数字世界重生 —</div>
+</div>
+
+<!-- ============================== -->
+<!-- SLIDE 2: 目录 -->
+<!-- ============================== -->
+<div class="slide" data-slide="1">
+    <div class="bg-ornament"></div>
+    <div class="corner-deco tl"></div><div class="corner-deco tr"></div>
+    <div class="corner-deco bl"></div><div class="corner-deco br"></div>
+    <div class="slide-title">目 录</div>
+    <div class="slide-title-deco"></div>
+    <div class="slide-content" style="margin-top:40px">
+        <div style="font-size:18px;line-height:3;letter-spacing:2px">
+            <div style="color:#d4a853;border-left:2px solid #d4a853;padding-left:20px;margin-bottom:8px">01　创作背景 · 千年云锦的数字化呼唤</div>
+            <div style="color:rgba(255,255,255,0.6);border-left:2px solid rgba(212,168,83,0.15);padding-left:20px;margin-bottom:8px">02　作品介绍 · 金陵纹影全览</div>
+            <div style="color:rgba(255,255,255,0.6);border-left:2px solid rgba(212,168,83,0.15);padding-left:20px;margin-bottom:8px">03　技术创新 · 十五大升级亮点</div>
+            <div style="color:rgba(255,255,255,0.6);border-left:2px solid rgba(212,168,83,0.15);padding-left:20px;margin-bottom:8px">04　展示效果 · 沉浸式体验</div>
+            <div style="color:rgba(255,255,255,0.6);border-left:2px solid rgba(212,168,83,0.15);padding-left:20px;margin-bottom:8px">05　作品价值 · 文化 × 社会 × 创新</div>
+            <div style="color:rgba(255,255,255,0.6);border-left:2px solid rgba(212,168,83,0.15);padding-left:20px">06　总结</div>
+        </div>
+    </div>
+    <div class="page-number">02 / 08</div>
+</div>
+
+<!-- ============================== -->
+<!-- SLIDE 3: 创作背景 -->
+<!-- ============================== -->
+<div class="slide" data-slide="2">
+    <div class="bg-ornament"></div>
+    <div class="corner-deco tl"></div><div class="corner-deco tr"></div>
+    <div class="corner-deco bl"></div><div class="corner-deco br"></div>
+    <div class="slide-title">01 · 创作背景</div>
+    <div class="slide-title-deco"></div>
+    <div class="slide-content">
+        <div style="font-size:13px;color:rgba(212,168,83,0.4);letter-spacing:4px;margin-bottom:4px">南京云锦 · 千年国粹</div>
+        <div class="two-col">
+            <div class="col">
+                <h3>🏮 千年传承</h3>
+                <p>南京云锦至今已有 <span class="highlight">近1600年</span> 历史，2009年被联合国教科文组织列入 <span class="highlight">《人类非物质文化遗产代表作名录》</span>。与成都蜀锦、苏州宋锦并称中国三大名锦，以独特的妆花工艺居首，素有"寸锦寸金"之说。</p>
+                <p style="margin-top:12px">日织仅 <span class="em">5-6厘米</span>，大花楼提花机高4米、长5.5米，需两人配合操作。</p>
+            </div>
+            <div class="col">
+                <h3>⚠️ 传承危机</h3>
+                <ul>
+                    <li>传承人老龄化，后继乏人</li>
+                    <li>年轻人对云锦认知度低</li>
+                    <li>传播方式局限于实物展览</li>
+                    <li>缺乏数字化交互式传播手段</li>
+                </ul>
+                <h3 style="margin-top:16px">💡 我们的答案</h3>
+                <p style="color:#d4a853">科技赋能非遗 · 让云锦在数字世界重生</p>
+            </div>
+        </div>
+    </div>
+    <div class="page-number">03 / 08</div>
+</div>
+
+<!-- ============================== -->
+<!-- SLIDE 4: 作品介绍 -->
+<!-- ============================== -->
+<div class="slide" data-slide="3">
+    <div class="bg-ornament"></div>
+    <div class="corner-deco tl"></div><div class="corner-deco tr"></div>
+    <div class="corner-deco bl"></div><div class="corner-deco br"></div>
+    <div class="slide-title">02 · 作品介绍</div>
+    <div class="slide-title-deco"></div>
+    <div class="slide-content">
+        <p style="margin-bottom:16px;font-size:14px;color:rgba(255,255,255,0.5);letter-spacing:2px">金陵纹影 —— 沉浸式3D云锦数字展，浏览器即开即用</p>
+        <div class="two-col">
+            <div class="col">
+                <h3>🏛️ 四大展示模块</h3>
+                <ul>
+                    <li><span class="highlight">云锦溯源</span> — 1600年历史画卷</li>
+                    <li><span class="highlight">纹样典藏</span> — 8大经典纹样3D展示</li>
+                    <li><span class="highlight">织造技艺</span> — 大花楼提花·通经断纬</li>
+                    <li><span class="highlight">AI新创</span> — AI融合传统纹样生成</li>
+                </ul>
+                <h3 style="margin-top:16px">🖥️ 技术栈</h3>
+                <ul>
+                    <li>Three.js r160 + WebGL 2.0</li>
+                    <li>UnrealBloom 泛光 + Reflector 反射</li>
+                    <li>Canvas 2D 程序化纹样生成</li>
+                    <li>Web Audio API 古风音乐</li>
+                </ul>
+            </div>
+            <div class="col">
+                <h3>✨ 展区布局</h3>
+                <div style="background:rgba(212,168,83,0.03);border:1px solid rgba(212,168,83,0.06);border-radius:8px;padding:16px;font-size:11px;line-height:1.6;font-family:monospace;color:rgba(212,168,83,0.4);letter-spacing:0">
+                    ┌─────────────────────┐<br>
+                    │ 藻井天幕 · 匾额 · 🏮  │<br>
+                    ├─────────────────────┤<br>
+                    │ ← 卷轴展板 ×4        │<br>
+                    │   中央龙纹主展         │<br>
+                    │ ← 卷轴展板 ×4        │<br>
+                    ├─────────────────────┤<br>
+                    │ 镜面地板 · 薄雾 · 金粉 │<br>
+                    └─────────────────────┘
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="page-number">04 / 08</div>
+</div>
+
+<!-- ============================== -->
+<!-- SLIDE 5: 技术创新 -->
+<!-- ============================== -->
+<div class="slide" data-slide="4">
+    <div class="bg-ornament"></div>
+    <div class="corner-deco tl"></div><div class="corner-deco tr"></div>
+    <div class="corner-deco bl"></div><div class="corner-deco br"></div>
+    <div class="slide-title">03 · 技术创新</div>
+    <div class="slide-title-deco"></div>
+    <div class="slide-content">
+        <div class="two-col">
+            <div class="col">
+                <h3>🏛️ 沉浸式3D虚拟展厅</h3>
+                <ul>
+                    <li>中式围廊布局 + <span class="highlight">斗拱</span> + <span class="highlight">花格窗</span></li>
+                    <li>镜面反射地面（Reflector实时反射）</li>
+                    <li>2500粒金粉系统 + 600粒地面薄雾</li>
+                    <li>8只<span class="highlight">动态灯笼</span>摇曳 + 烛光闪烁</li>
+                    <li>UnrealBloom泛光 (strength:0.35)</li>
+                </ul>
+                <h3 style="margin-top:16px">🎨 纹样数字化重建</h3>
+                <ul>
+                    <li>五层结构：如意→缠枝→金环→团花→金蕊</li>
+                    <li>Canvas 2D程序化生成，保留传统美学</li>
+                    <li><span class="highlight">纹样放大镜</span>：2048×2048 高清细节</li>
+                    <li>金线描边 + 金属光泽模拟</li>
+                </ul>
+            </div>
+            <div class="col">
+                <h3>🤖 AI + 交互创新</h3>
+                <ul>
+                    <li>AI纹样：传统配色 + 现代构成</li>
+                    <li>导览漫游 + 自动旋转 + 一键截图</li>
+                    <li>五声音阶（宫商角徵羽）背景音乐</li>
+                </ul>
+                <h3 style="margin-top:16px">📊 版本演进</h3>
+                <table class="compare-table">
+                    <tr><th></th><th>v1.0</th><th>v3.0</th></tr>
+                    <tr><td>粒子</td><td>800</td><td>2500 + 薄雾600</td></tr>
+                    <tr><td>纹样</td><td>简单几何</td><td>五层结构+金线</td></tr>
+                    <tr><td>地面</td><td>素面</td><td>镜面反射</td></tr>
+                    <tr><td>交互</td><td>点击查看</td><td>7种交互+放大镜</td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="page-number">05 / 08</div>
+</div>
+
+<!-- ============================== -->
+<!-- SLIDE 6: 展示效果 -->
+<!-- ============================== -->
+<div class="slide" data-slide="5">
+    <div class="bg-ornament"></div>
+    <div class="corner-deco tl"></div><div class="corner-deco tr"></div>
+    <div class="corner-deco bl"></div><div class="corner-deco br"></div>
+    <div class="slide-title">04 · 展示效果</div>
+    <div class="slide-title-deco"></div>
+    <div class="slide-content">
+        <p style="margin-bottom:16px;color:rgba(255,255,255,0.4);letter-spacing:2px">建议现场打开作品链接进行实时演示，以下为关键展示亮点</p>
+        <div class="two-col">
+            <div class="col">
+                <h3>📸 展示亮点</h3>
+                <ul>
+                    <li><span class="highlight">开场</span>：加载动画 → 展厅全景呈现，镜面地板倒影 + 泛光氛围</li>
+                    <li><span class="highlight">纹样典藏</span>：点击任一纹样展板 → 2048px放大镜 + 文化解读</li>
+                    <li><span class="highlight">导览模式</span>：一键自动巡游，适合答辩演示</li>
+                    <li><span class="highlight">漫游模式</span>：展厅自转，全方位展示</li>
+                    <li><span class="highlight">交互细节</span>：灯笼摇曳、金粉飘洒、薄雾流动</li>
+                </ul>
+            </div>
+            <div class="col">
+                <h3>🎮 交互清单</h3>
+                <ul>
+                    <li>🖱 拖拽旋转 · 滚轮缩放</li>
+                    <li>👆 点击展品 → 文化详情</li>
+                    <li>👆 点击纹样 → 高清放大镜</li>
+                    <li>🎧 导览漫游 · 自动旋转</li>
+                    <li>📷 一键截图保存</li>
+                    <li>♪ 五声音阶氛围音效</li>
+                    <li>⌨ ESC关闭 / F全屏</li>
+                </ul>
+            </div>
+        </div>
+        <div style="margin-top:16px;padding:14px 20px;background:rgba(212,168,83,0.04);border-radius:8px;border:1px solid rgba(212,168,83,0.06);font-size:13px;color:rgba(212,168,83,0.5);text-align:center;letter-spacing:2px">
+            🌐 访问链接：https://chy2hy.github.io/jinling-wenyin/　（推荐Chrome/Edge最新版）
+        </div>
+    </div>
+    <div class="page-number">06 / 08</div>
+</div>
+
+<!-- ============================== -->
+<!-- SLIDE 7: 作品价值 -->
+<!-- ============================== -->
+<div class="slide" data-slide="6">
+    <div class="bg-ornament"></div>
+    <div class="corner-deco tl"></div><div class="corner-deco tr"></div>
+    <div class="corner-deco bl"></div><div class="corner-deco br"></div>
+    <div class="slide-title">05 · 作品价值</div>
+    <div class="slide-title-deco"></div>
+    <div class="slide-content">
+        <div class="two-col">
+            <div class="col">
+                <h3>📚 文化价值</h3>
+                <ul>
+                    <li>非遗数字化传承新范式</li>
+                    <li>降低云锦认知门槛，吸引年轻人</li>
+                    <li>传统纹样数字档案永久保存</li>
+                    <li>云锦文化全球可访问</li>
+                </ul>
+                <h3 style="margin-top:16px">🌍 社会价值</h3>
+                <ul>
+                    <li>响应国家"文化数字化"战略</li>
+                    <li>低成本文博展陈方案</li>
+                    <li>传统文化与前沿科技融合示范</li>
+                    <li>零安装零成本，链接即传播</li>
+                </ul>
+            </div>
+            <div class="col">
+                <h3>💡 创新价值</h3>
+                <table class="compare-table" style="margin-top:0">
+                    <tr><th>维度</th><th>传统方式</th><th>本作品</th></tr>
+                    <tr><td>纹样制作</td><td>手工绘制</td><td>程序化生成</td></tr>
+                    <tr><td>展示载体</td><td>实物/图片</td><td>浏览器3D场景</td></tr>
+                    <tr><td>传播范围</td><td>现场参观</td><td>链接全球分享</td></tr>
+                    <tr><td>交互方式</td><td>远观</td><td>360°旋转+点击探索</td></tr>
+                    <tr><td>部署成本</td><td>展馆+运输</td><td>GitHub Pages零成本</td></tr>
+                </table>
+                <h3 style="margin-top:16px">🔑 核心优势</h3>
+                <ul>
+                    <li>纯前端，无后端依赖</li>
+                    <li>所有资源程序化生成</li>
+                    <li>兼容主流浏览器</li>
+                    <li>可嵌入任意网页</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="page-number">07 / 08</div>
+</div>
+
+<!-- ============================== -->
+<!-- SLIDE 8: 总结 -->
+<!-- ============================== -->
+<div class="slide" data-slide="7">
+    <div class="bg-ornament"></div>
+    <div class="corner-deco tl"></div><div class="corner-deco tr"></div>
+    <div class="corner-deco bl"></div><div class="corner-deco br"></div>
+    <div style="text-align:center;padding-top:80px">
+        <div style="font-size:18px;color:rgba(255,255,255,0.3);letter-spacing:6px;margin-bottom:16px">总 结</div>
+        <div style="font-size:42px;color:#d4a853;letter-spacing:8px;line-height:1.6;font-weight:700;max-width:700px;margin:0 auto">
+            金陵纹影，让千年云锦<br>在数字世界 <span style="color:#cd3333">灿若云霞</span>
+        </div>
+        <div style="width:200px;height:1px;background:linear-gradient(90deg,transparent,#d4a853,transparent);margin:30px auto"></div>
+        <div style="font-size:16px;color:rgba(255,255,255,0.4);letter-spacing:6px;margin-top:16px">科技赋能非遗 · 数字活化传统</div>
+        <div style="margin-top:60px;font-size:28px;color:rgba(212,168,83,0.6);letter-spacing:12px;font-weight:700">金陵纹影</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.2);letter-spacing:4px;margin-top:8px">南京云锦数字化3D交互展示</div>
+        <div style="margin-top:40px;font-size:13px;color:rgba(255,255,255,0.15);letter-spacing:3px">
+            佳豪队 · 南京晓庄学院 · 江苏赛区
+        </div>
+        <div style="margin-top:40px;font-size:36px;color:rgba(212,168,83,0.3);letter-spacing:8px">谢谢！</div>
+    </div>
+    <div class="page-number">08 / 08</div>
+</div>
+
+</div>
+
+<!-- ===== 底部控制栏 ===== -->
+<div id="controls">
+    <button id="btn-first">⏮</button>
+    <button id="btn-prev">◀</button>
+    <span class="page-info" id="page-info">01 / 08</span>
+    <button id="btn-next">▶</button>
+    <button id="btn-last">⏭</button>
+    <div class="progress"><div class="progress-bar" id="progress-bar" style="width:0%"></div></div>
+    <span class="key-hint">← → 翻页 · ESC退出 · F全屏</span>
+</div>
+
+<script>
+let current = 0;
+const total = 8;
+
+function goTo(n) {
+    document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
+    current = Math.max(0, Math.min(n, total-1));
+    document.querySelector(`[data-slide="${current}"]`).classList.add('active');
+    document.getElementById('page-info').textContent =
+        String(current+1).padStart(2,'0') + ' / ' + String(total).padStart(2,'0');
+    document.getElementById('progress-bar').style.width = ((current+1)/total*100) + '%';
+}
+
+document.getElementById('btn-prev').addEventListener('click', () => goTo(current-1));
+document.getElementById('btn-next').addEventListener('click', () => goTo(current+1));
+document.getElementById('btn-first').addEventListener('click', () => goTo(0));
+document.getElementById('btn-last').addEventListener('click', () => goTo(total-1));
+
+document.addEventListener('keydown', e => {
+    if(e.key === 'ArrowLeft' || e.key === 'ArrowUp') goTo(current-1);
+    if(e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') { e.preventDefault(); goTo(current+1); }
+    if(e.key === 'f' || e.key === 'F') {
+        if(document.fullscreenElement) document.exitFullscreen();
+        else document.documentElement.requestFullscreen();
+    }
+});
+</script>
+
+</body>
+</html>

@@ -4,16 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>金陵纹影 · 南京云锦数字化3D交互展</title>
-
-<!-- ===== 字体 ===== -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=ZCOOL+XiaoWei&display=swap" rel="stylesheet">
-
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=ZCOOL+XiaoWei&family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
 <style>
-/* ===== 全局重置 ===== */
 *{margin:0;padding:0;box-sizing:border-box}
 body{overflow:hidden;background:#080604;font-family:'Noto Serif SC','ZCOOL XiaoWei',serif;-webkit-font-smoothing:antialiased}
-#canvas-container{width:100vw;height:100vh;display:block}
 
 /* ===== 加载画面 ===== */
 #loader{
@@ -23,133 +18,113 @@ body{overflow:hidden;background:#080604;font-family:'Noto Serif SC','ZCOOL XiaoW
     transition:opacity 1.2s ease;font-family:'Noto Serif SC',serif;
 }
 #loader.hide{opacity:0;pointer-events:none}
-#loader .logo{font-size:36px;color:#d4a853;letter-spacing:10px;font-weight:700}
+#loader .logo{font-size:42px;color:#d4a853;letter-spacing:12px;font-weight:700;position:relative}
 #loader .logo span{color:#cd3333}
-#loader .sub{color:rgba(255,255,255,0.35);font-size:13px;letter-spacing:6px;margin:8px 0 40px}
-#loader .progress-wrap{width:280px;height:2px;background:rgba(212,168,83,0.1);border-radius:2px;overflow:hidden}
-#loader .progress-bar{width:0%;height:100%;background:linear-gradient(90deg,#d4a853,#cd3333);transition:width 0.3s ease;border-radius:2px}
-#loader .progress-text{color:rgba(212,168,83,0.5);font-size:12px;letter-spacing:2px;margin-top:8px}
+#loader .logo-deco{width:200px;height:1px;background:linear-gradient(90deg,transparent,#d4a853,transparent);margin:12px auto}
+#loader .sub{color:rgba(255,255,255,0.3);font-size:13px;letter-spacing:8px;margin:4px 0 40px}
+#loader .progress-wrap{width:300px;height:2px;background:rgba(212,168,83,0.08);border-radius:2px;overflow:hidden}
+#loader .progress-bar{width:0%;height:100%;background:linear-gradient(90deg,#d4a853,#cd3333,#d4a853);background-size:200% 100%;animation:shimmer 2s infinite;border-radius:2px}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+#loader .progress-text{color:rgba(212,168,83,0.4);font-size:11px;letter-spacing:3px;margin-top:10px}
+#loader .deco-border{position:absolute;width:300px;height:200px;border:1px solid rgba(212,168,83,0.06);border-radius:4px;pointer-events:none}
 
-/* ===== HUD 标题 ===== */
-#hud{
-    position:fixed;top:24px;left:50%;transform:translateX(-50%);z-index:100;
-    text-align:center;pointer-events:none;opacity:0;transition:opacity 2s ease;
-}
+/* ===== HUD ===== */
+#hud{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:100;text-align:center;pointer-events:none;opacity:0;transition:opacity 2s ease}
 #hud.show{opacity:1}
-#hud h1{font-size:30px;font-weight:700;letter-spacing:10px;color:#d4a853;text-shadow:0 0 40px rgba(212,168,83,0.15)}
-#hud p{font-size:13px;color:rgba(255,255,255,0.3);letter-spacing:6px;margin-top:2px}
+#hud h1{font-size:32px;font-weight:700;letter-spacing:12px;color:#d4a853;text-shadow:0 0 60px rgba(212,168,83,0.12)}
+#hud p{font-size:12px;color:rgba(255,255,255,0.25);letter-spacing:8px;margin-top:2px}
 
 /* ===== 导航 ===== */
-#nav{
-    position:fixed;top:80px;left:50%;transform:translateX(-50%);z-index:100;
-    display:flex;gap:6px;flex-wrap:wrap;justify-content:center;opacity:0;transition:opacity 1s ease;
-}
+#nav{position:fixed;top:78px;left:50%;transform:translateX(-50%);z-index:100;display:flex;gap:4px;flex-wrap:wrap;justify-content:center;opacity:0;transition:opacity 1s ease}
 #nav.show{opacity:1}
-#nav button{
-    background:rgba(255,255,255,0.04);border:1px solid rgba(212,168,83,0.15);
-    color:rgba(255,255,255,0.5);padding:6px 18px;border-radius:20px;
-    font-size:12px;letter-spacing:2px;cursor:pointer;font-family:inherit;
-    transition:all 0.4s ease;pointer-events:auto;backdrop-filter:blur(8px);
-}
-#nav button:hover{background:rgba(212,168,83,0.15);color:#d4a853;border-color:rgba(212,168,83,0.3);transform:translateY(-1px)}
-#nav button.active{background:rgba(212,168,83,0.12);color:#d4a853;border-color:#d4a853}
+#nav button{background:rgba(255,255,255,0.03);border:1px solid rgba(212,168,83,0.12);color:rgba(255,255,255,0.4);padding:6px 16px;border-radius:20px;font-size:12px;letter-spacing:2px;cursor:pointer;font-family:inherit;transition:all 0.4s ease;pointer-events:auto;backdrop-filter:blur(8px)}
+#nav button:hover{background:rgba(212,168,83,0.12);color:#d4a853;border-color:rgba(212,168,83,0.25);transform:translateY(-1px)}
+#nav button.active{background:rgba(212,168,83,0.1);color:#d4a853;border-color:#d4a853}
 
-/* ===== 信息面板 ===== */
-#info-overlay{
-    position:fixed;inset:0;z-index:200;
-    background:rgba(0,0,0,0.7);backdrop-filter:blur(16px);
-    display:flex;align-items:center;justify-content:center;
-    opacity:0;pointer-events:none;transition:all 0.6s cubic-bezier(0.4,0,0.2,1);
-}
+/* ===== 信息弹窗 ===== */
+#info-overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.75);backdrop-filter:blur(20px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:all 0.6s cubic-bezier(0.4,0,0.2,1)}
 #info-overlay.show{opacity:1;pointer-events:auto}
-#info-panel{
-    max-width:680px;width:90%;max-height:85vh;overflow-y:auto;
-    background:linear-gradient(145deg,rgba(20,14,8,0.95),rgba(10,8,6,0.98));
-    border:1px solid rgba(212,168,83,0.2);border-radius:16px;
-    padding:40px 44px;position:relative;
-    transform:translateY(30px);transition:transform 0.6s cubic-bezier(0.4,0,0.2,1);
-}
+#info-panel{max-width:680px;width:90%;max-height:85vh;overflow-y:auto;background:linear-gradient(145deg,rgba(25,18,12,0.96),rgba(12,10,8,0.98));border:1px solid rgba(212,168,83,0.15);border-radius:16px;padding:40px 44px;position:relative;transform:translateY(30px);transition:transform 0.6s cubic-bezier(0.4,0,0.2,1);box-shadow:0 20px 80px rgba(0,0,0,0.5),inset 0 0 80px rgba(212,168,83,0.02)}
 #info-overlay.show #info-panel{transform:translateY(0)}
-#info-panel::-webkit-scrollbar{width:4px}
-#info-panel::-webkit-scrollbar-thumb{background:rgba(212,168,83,0.3);border-radius:2px}
-#info-close{
-    position:absolute;top:16px;right:20px;
-    background:none;border:none;color:rgba(255,255,255,0.3);
-    font-size:22px;cursor:pointer;transition:color 0.3s;font-family:inherit;
-}
+#info-panel::-webkit-scrollbar{width:3px}
+#info-panel::-webkit-scrollbar-thumb{background:rgba(212,168,83,0.2);border-radius:2px}
+#info-close{position:absolute;top:16px;right:20px;background:none;border:none;color:rgba(255,255,255,0.25);font-size:20px;cursor:pointer;transition:color 0.3s;font-family:inherit}
 #info-close:hover{color:#d4a853}
-#info-panel .tag{
-    display:inline-block;padding:3px 14px;border:1px solid rgba(212,168,83,0.3);
-    border-radius:12px;font-size:11px;color:#d4a853;letter-spacing:2px;margin-bottom:12px;
-}
-#info-panel .title{font-size:30px;color:#d4a853;font-weight:700;letter-spacing:4px;margin-bottom:4px}
-#info-panel .subtitle{font-size:14px;color:rgba(255,255,255,0.35);letter-spacing:3px;margin-bottom:20px}
-#info-panel .divider{height:1px;background:linear-gradient(90deg,transparent,rgba(212,168,83,0.3),transparent);margin-bottom:20px}
-#info-panel .desc{font-size:15px;color:rgba(255,255,255,0.75);line-height:2;letter-spacing:0.5px;text-align:justify}
+#info-panel .tag{display:inline-block;padding:2px 14px;border:1px solid rgba(212,168,83,0.2);border-radius:12px;font-size:11px;color:#d4a853;letter-spacing:2px;margin-bottom:10px}
+#info-panel .title{font-size:32px;color:#d4a853;font-weight:700;letter-spacing:4px;margin-bottom:2px}
+#info-panel .subtitle{font-size:13px;color:rgba(255,255,255,0.3);letter-spacing:3px;margin-bottom:18px}
+#info-panel .divider{height:1px;background:linear-gradient(90deg,transparent,rgba(212,168,83,0.2),transparent);margin:18px 0}
+#info-panel .desc{font-size:14px;color:rgba(255,255,255,0.7);line-height:2;letter-spacing:0.5px;text-align:justify}
 #info-panel .highlight{color:#d4a853}
+#info-panel .culture-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px}
+#info-panel .culture-tag{padding:4px 12px;background:rgba(212,168,83,0.06);border:1px solid rgba(212,168,83,0.1);border-radius:12px;font-size:11px;color:rgba(212,168,83,0.6);letter-spacing:1px}
+
+/* ===== 纹样放大镜 Overlay ===== */
+#detail-overlay{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,0.85);backdrop-filter:blur(30px);display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:all 0.5s cubic-bezier(0.4,0,0.2,1)}
+#detail-overlay.show{opacity:1;pointer-events:auto}
+#detail-overlay .close-btn{position:absolute;top:20px;right:28px;background:none;border:none;color:rgba(255,255,255,0.3);font-size:28px;cursor:pointer;transition:color 0.3s;font-family:inherit;z-index:10}
+#detail-overlay .close-btn:hover{color:#d4a853}
+#detail-canvas-wrap{width:80vmin;height:80vmin;max-width:700px;max-height:700px;border-radius:12px;overflow:hidden;border:1px solid rgba(212,168,83,0.15);position:relative;box-shadow:0 0 80px rgba(212,168,83,0.05)}
+#detail-canvas-wrap canvas{width:100%;height:100%;display:block}
+#detail-info-wrap{text-align:center;margin-top:24px;max-width:600px}
+#detail-info-wrap .detail-name{font-size:26px;color:#d4a853;letter-spacing:4px;font-weight:700}
+#detail-info-wrap .detail-meaning{font-size:13px;color:rgba(255,255,255,0.4);letter-spacing:3px;margin-top:4px}
+#detail-info-wrap .detail-desc{font-size:13px;color:rgba(255,255,255,0.5);letter-spacing:1px;line-height:1.8;margin-top:10px}
+#detail-close-hint{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,0.15);font-size:11px;letter-spacing:2px}
 
 /* ===== 浮动工具栏 ===== */
-#toolbar{
-    position:fixed;bottom:32px;left:50%;transform:translateX(-50%);z-index:100;
-    display:flex;gap:12px;opacity:0;transition:opacity 1.5s ease;
-}
+#toolbar{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);z-index:100;display:flex;gap:8px;opacity:0;transition:opacity 1.5s ease}
 #toolbar.show{opacity:1}
-#toolbar button{
-    background:rgba(10,8,6,0.7);border:1px solid rgba(212,168,83,0.15);
-    color:rgba(255,255,255,0.5);padding:8px 18px;border-radius:24px;
-    font-size:12px;letter-spacing:1px;cursor:pointer;font-family:inherit;
-    backdrop-filter:blur(12px);transition:all 0.4s ease;
-    display:flex;align-items:center;gap:6px;
-}
-#toolbar button:hover{background:rgba(212,168,83,0.12);color:#d4a853;border-color:rgba(212,168,83,0.3)}
-#toolbar button.active{background:rgba(212,168,83,0.1);color:#d4a853;border-color:#d4a853}
+#toolbar button{background:rgba(10,8,6,0.6);border:1px solid rgba(212,168,83,0.1);color:rgba(255,255,255,0.45);padding:7px 16px;border-radius:24px;font-size:11px;letter-spacing:1px;cursor:pointer;font-family:inherit;backdrop-filter:blur(12px);transition:all 0.35s ease;display:flex;align-items:center;gap:5px}
+#toolbar button:hover{background:rgba(212,168,83,0.1);color:#d4a853;border-color:rgba(212,168,83,0.2);transform:translateY(-1px)}
+#toolbar button.active{background:rgba(212,168,83,0.08);color:#d4a853;border-color:#d4a853}
 #toolbar .icon{font-size:14px}
 
-/* ===== 控制提示 ===== */
-#hint{
-    position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:50;
-    color:rgba(255,255,255,0.15);font-size:11px;letter-spacing:3px;
-    opacity:0;transition:opacity 2s ease;text-align:center;pointer-events:none;
-}
+/* ===== 提示 ===== */
+#hint{position:fixed;bottom:76px;left:50%;transform:translateX(-50%);z-index:50;color:rgba(255,255,255,0.12);font-size:11px;letter-spacing:3px;opacity:0;transition:opacity 2s ease;text-align:center;pointer-events:none}
 #hint.show{opacity:1}
 
 /* ===== 音频提示 ===== */
-#audio-init{
-    position:fixed;bottom:32px;right:32px;z-index:100;
-    background:rgba(10,8,6,0.6);border:1px solid rgba(212,168,83,0.12);
-    color:rgba(255,255,255,0.3);padding:8px 14px;border-radius:20px;
-    font-size:11px;letter-spacing:1px;cursor:pointer;font-family:inherit;
-    backdrop-filter:blur(8px);transition:all 0.3s;opacity:0;
-}
+#audio-init{position:fixed;bottom:28px;right:28px;z-index:100;background:rgba(10,8,6,0.5);border:1px solid rgba(212,168,83,0.1);color:rgba(255,255,255,0.25);padding:7px 14px;border-radius:20px;font-size:11px;letter-spacing:1px;cursor:pointer;font-family:inherit;backdrop-filter:blur(8px);transition:all 0.3s;opacity:0}
 #audio-init.show{opacity:1}
-#audio-init:hover{color:#d4a853;border-color:rgba(212,168,83,0.3)}
+#audio-init:hover{color:#d4a853;border-color:rgba(212,168,83,0.25)}
 
-/* ===== 视频录制标记 ===== */
-#rec-badge{
-    position:fixed;top:24px;right:24px;z-index:100;
-    display:flex;align-items:center;gap:6px;opacity:0;transition:opacity 1s;
-}
+/* ===== 录制标记 ===== */
+#rec-badge{position:fixed;top:24px;right:24px;z-index:100;display:flex;align-items:center;gap:6px;opacity:0;transition:opacity 1s}
 #rec-badge.show{opacity:1}
 #rec-badge .dot{width:8px;height:8px;background:#cd3333;border-radius:50%;animation:pulse 1.5s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
-#rec-badge span{font-size:11px;color:rgba(255,255,255,0.3);letter-spacing:2px}
+#rec-badge span{font-size:10px;color:rgba(255,255,255,0.2);letter-spacing:2px}
 
-/* ===== 滚动条美化 ===== */
-::-webkit-scrollbar{width:4px}
+/* ===== 截图闪光 ===== */
+#flash{position:fixed;inset:0;z-index:9998;background:#fff;opacity:0;pointer-events:none;transition:opacity 0.15s}
+#flash.active{opacity:0.6}
+#flash.fade{opacity:0;transition:opacity 0.5s}
+
+/* ===== 滚动条 ===== */
+::-webkit-scrollbar{width:3px}
 ::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:rgba(212,168,83,0.2);border-radius:2px}
+::-webkit-scrollbar-thumb{background:rgba(212,168,83,0.15);border-radius:2px}
 
 /* ===== 响应式 ===== */
 @media(max-width:768px){
-    #hud h1{font-size:20px;letter-spacing:6px}
-    #hud p{font-size:11px;letter-spacing:4px}
-    #nav{top:68px;gap:4px}
-    #nav button{font-size:11px;padding:4px 14px;letter-spacing:1px}
-    #info-panel{padding:28px 24px}
+    #hud h1{font-size:22px;letter-spacing:6px}
+    #hud p{font-size:10px;letter-spacing:4px}
+    #nav{top:66px;gap:3px}
+    #nav button{font-size:10px;padding:4px 12px;letter-spacing:1px}
+    #info-panel{padding:24px 20px}
     #info-panel .title{font-size:24px}
-    #toolbar{gap:8px}
-    #toolbar button{font-size:11px;padding:6px 14px}
-    #audio-init{bottom:80px;right:16px}
+    #toolbar{gap:5px;bottom:16px}
+    #toolbar button{font-size:10px;padding:5px 10px}
+    #audio-init{bottom:70px;right:12px}
+    #detail-canvas-wrap{width:90vmin;height:90vmin}
+    #loader .logo{font-size:30px;letter-spacing:8px}
+}
+@media(max-width:480px){
+    #nav{top:60px}
+    #nav button{font-size:9px;padding:3px 10px}
+    #toolbar button .label{display:none}
+    #hint{display:none}
 }
 </style>
 </head>
@@ -157,7 +132,9 @@ body{overflow:hidden;background:#080604;font-family:'Noto Serif SC','ZCOOL XiaoW
 
 <!-- ===== 加载画面 ===== -->
 <div id="loader">
+    <div class="deco-border"></div>
     <div class="logo">金陵<span>纹</span>影</div>
+    <div class="logo-deco"></div>
     <div class="sub">南京云锦 · 数字化3D交互展</div>
     <div class="progress-wrap"><div class="progress-bar" id="progress-bar"></div></div>
     <div class="progress-text" id="progress-text">加载中 0%</div>
@@ -183,24 +160,39 @@ body{overflow:hidden;background:#080604;font-family:'Noto Serif SC','ZCOOL XiaoW
         <div class="subtitle" id="info-subtitle"></div>
         <div class="divider"></div>
         <div class="desc" id="info-desc"></div>
+        <div class="culture-tags" id="info-tags"></div>
     </div>
+</div>
+
+<!-- ===== 纹样放大镜 ===== -->
+<div id="detail-overlay">
+    <button class="close-btn" id="detail-close">✕</button>
+    <div id="detail-canvas-wrap"><canvas id="detail-canvas"></canvas></div>
+    <div id="detail-info-wrap">
+        <div class="detail-name" id="detail-name"></div>
+        <div class="detail-meaning" id="detail-meaning"></div>
+        <div class="detail-desc" id="detail-desc"></div>
+    </div>
+    <div id="detail-close-hint">按 ESC 关闭</div>
 </div>
 
 <!-- ===== 工具栏 ===== -->
 <div id="toolbar">
-    <button id="btn-tour"><span class="icon">🎧</span> 导览</button>
-    <button id="btn-auto"><span class="icon">⟳</span> 自动漫游</button>
-    <button id="btn-sound"><span class="icon">♪</span> 音效</button>
-    <button id="btn-fullscreen"><span class="icon">⛶</span> 全屏</button>
+    <button id="btn-tour"><span class="icon">🎧</span><span class="label"> 导览</span></button>
+    <button id="btn-auto"><span class="icon">⟳</span><span class="label"> 漫游</span></button>
+    <button id="btn-sound"><span class="icon">♪</span><span class="label"> 音效</span></button>
+    <button id="btn-screenshot"><span class="icon">📷</span><span class="label"> 截图</span></button>
+    <button id="btn-fullscreen"><span class="icon">⛶</span><span class="label"> 全屏</span></button>
 </div>
 
 <!-- ===== 提示 ===== -->
 <div id="hint">🖱 拖拽旋转 · 滚轮缩放 · 点击展品了解详情</div>
 <div id="audio-init">🎵 点击开启音效</div>
+<div id="flash"></div>
 
 <div id="canvas-container"></div>
 
-<!-- ===== Three.js ES Module ===== -->
+<!-- ===== Three.js ===== -->
 <script type="importmap">
 {
     "imports": {
@@ -219,50 +211,51 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { Reflector } from 'three/addons/objects/Reflector.js';
 
 // ============================================================
-//  展品数据
+//  展品数据（v3.0 扩展版）
 // ============================================================
 const EXHIBITS = [
     {
         id:'origin', title:'云锦溯源', tag:'世界非物质文化遗产',
         subtitle:'1600年 · 灿若云霞',
-        desc:'南京云锦，因其绚丽多姿、灿若云霞而得名，至今已有近1600年历史。2009年被联合国教科文组织列入《人类非物质文化遗产代表作名录》。云锦与成都蜀锦、苏州宋锦并称中国三大名锦，而云锦以其独特的妆花工艺居首，素有"寸锦寸金"之说。',
-        color:'#d4a853', pos:[0,1.8,-7]
+        desc:'南京云锦，因其绚丽多姿、灿若云霞而得名，至今已有近1600年历史。2009年被联合国教科文组织列入《人类非物质文化遗产代表作名录》。云锦与成都蜀锦、苏州宋锦并称中国三大名锦，而云锦以其独特的妆花工艺居首，素有"<span class="highlight">寸锦寸金</span>"之说。唐宋时期，南京丝织业已十分发达；元代设织染局；明清两代设江宁织造府，专为皇家织造御用贡品。',
+        color:'#d4a853', pos:[0,1.8,-7], tags:['非遗','历史','1600年','皇家御用']
     },
     {
         id:'patterns', title:'龙凤呈祥', tag:'经典纹样 · 明代万历',
         subtitle:'龙飞凤舞 · 吉祥如意',
-        desc:'云锦经典纹样，以龙、凤为主体，辅以祥云、花卉。龙代表权威尊贵，凤象征吉祥和谐。采用妆花工艺，以金线、彩绒交织，图案层次丰富、金彩交辉，是云锦最具代表性的纹样之一。明万历皇帝龙袍即采用此类纹样。',
-        color:'#cd3333', pos:[-5.5,1.8,0]
+        desc:'云锦经典纹样，以龙、凤为主体，辅以祥云、花卉。龙代表权威尊贵，凤象征吉祥和谐。采用<span class="highlight">妆花工艺</span>，以金线、彩绒交织，图案层次丰富、金彩交辉，是云锦最具代表性的纹样之一。明万历皇帝龙袍即采用此类纹样。明定陵出土的万历皇帝妆花纱龙袍即是此类纹样的巅峰之作。',
+        color:'#cd3333', pos:[-5.5,1.8,0], tags:['龙凤','明代','妆花','金线']
     },
     {
         id:'weaving', title:'织造技艺', tag:'挑花结本 · 通经断纬',
         subtitle:'两人配合 · 日织5厘米',
-        desc:'云锦使用传统的提花木机织造，由"拽花工"和"织手"两人配合完成。挑花结本相当于现代编程，将纹样转化为织造程序；通经断纬技术则使图案色彩丰富、过渡自然。一名熟练织工一天仅能织造5-6厘米，可谓"寸锦寸金"。该技艺代表了中国古代丝织工艺的最高水平。',
-        color:'#8b6914', pos:[5.5,1.8,0]
+        desc:'云锦使用传统的提花木机织造，由"<span class="highlight">拽花工</span>"和"<span class="highlight">织手</span>"两人配合完成。挑花结本相当于现代编程，将纹样转化为织造程序；通经断纬技术则使图案色彩丰富、过渡自然。一名熟练织工一天仅能织造5-6厘米，可谓"寸锦寸金"。大花楼提花机高4米、长5.5米，需两人同时操作，代表了中国古代丝织工艺的最高水平。',
+        color:'#8b6914', pos:[5.5,1.8,0], tags:['提花木机','两人配合','大花楼','寸锦寸金']
     },
     {
         id:'ai', title:'AI 新创纹样', tag:'人工智能 · 传统新生',
         subtitle:'算法学习 · 风格融合',
-        desc:'基于传统云锦纹样的色彩搭配与构图规律，AI深度学习模型通过学习数百幅云锦经典纹样，生成融合传统美学与现代设计的全新纹样。传统与科技的融合，让千年云锦在数字时代焕发新生。每一幅AI纹样都是独一无二的，代表着非遗创新的未来方向。',
-        color:'#4a7a9c', pos:[0,1.8,7]
+        desc:'基于传统云锦纹样的色彩搭配与构图规律，AI深度学习模型通过学习数百幅云锦经典纹样，生成融合传统美学与现代设计的全新纹样。传统与科技的融合，让千年云锦在数字时代焕发新生。每一幅AI纹样都是独一无二的，代表着非遗创新的未来方向。本作品中的AI纹样在色彩构图上保留了云锦的华丽特质，同时融入了现代审美元素。',
+        color:'#4a7a9c', pos:[0,1.8,7], tags:['人工智能','深度学习','非遗创新','风格融合']
     }
 ];
 
 const PATTERNS = [
-    { name:'龙凤呈祥', meaning:'尊贵吉祥', color:'#cd3333' },
-    { name:'鱼戏莲', meaning:'连年有余', color:'#4a7a9c' },
-    { name:'五福捧寿', meaning:'五福临门', color:'#6b8e23' },
-    { name:'富贵牡丹', meaning:'繁荣昌盛', color:'#cd5c5c' },
-    { name:'八宝纹', meaning:'驱邪纳福', color:'#8b6914' },
-    { name:'祥云瑞彩', meaning:'好运连连', color:'#d4a853' },
-    { name:'海水江崖', meaning:'江山永固', color:'#2a5a7a' },
-    { name:'AI新创', meaning:'融合创新', color:'#4a7a9c' }
+    { name:'龙凤呈祥', meaning:'尊贵吉祥', color:'#cd3333', desc:'云锦中最经典的帝王纹样，龙飞凤舞间尽显皇家气度。采用妆花工艺以金线交织，图案层次丰富、金彩交辉。', period:'明代万历' },
+    { name:'鱼戏莲', meaning:'连年有余', color:'#4a7a9c', desc:'江南水乡的灵动意象，鱼与莲的谐音寓意"连年有余"，寄托对丰收富足的美好期盼。', period:'清代' },
+    { name:'五福捧寿', meaning:'五福临门', color:'#6b8e23', desc:'五只蝙蝠围绕寿字飞舞，取"蝠"与"福"的谐音，寓意长寿、富贵、康宁、好德、善终五福俱全。', period:'清代乾隆' },
+    { name:'富贵牡丹', meaning:'繁荣昌盛', color:'#cd5c5c', desc:'牡丹花大色艳，素有"花中之王"的美誉，象征荣华富贵。云锦牡丹纹层层叠染，富丽堂皇。', period:'唐代' },
+    { name:'八宝纹', meaning:'驱邪纳福', color:'#8b6914', desc:'八种吉祥宝物——宝珠、方胜、磐、犀角、铜钱、菱镜、书本、艾叶，寓意驱邪避灾、纳福迎祥。', period:'元代' },
+    { name:'祥云瑞彩', meaning:'好运连连', color:'#d4a853', desc:'云锦之名源于"灿若云霞"，祥云纹是其最根本的装饰元素。流动的云气纹样象征着天赐吉祥。', period:'历代传承' },
+    { name:'海水江崖', meaning:'江山永固', color:'#2a5a7a', desc:'古代龙袍下摆的经典纹样，立水、江牙、山石组合，寓意江山永固、基业长青。又称"江牙海水"。', period:'明清' },
+    { name:'AI新创 · 金陵', meaning:'融合创新', color:'#5a3a8a', desc:'基于深度学习生成的全新纹样，融合云锦传统配色规律与现代构成美学，千年非遗在数字时代焕发新生。', period:'2026' }
 ];
 
 // ============================================================
-//  DOM 引用
+//  DOM
 // ============================================================
 const container = document.getElementById('canvas-container');
 const loader = document.getElementById('loader');
@@ -272,7 +265,7 @@ const hud = document.getElementById('hud');
 const nav = document.getElementById('nav');
 const hint = document.getElementById('hint');
 const toolbar = document.getElementById('toolbar');
-const audioInit = document.getElementById('audio-init');
+const audioBtn = document.getElementById('audio-init');
 const infoOverlay = document.getElementById('info-overlay');
 const infoPanel = document.getElementById('info-panel');
 const infoClose = document.getElementById('info-close');
@@ -280,9 +273,17 @@ const infoTag = document.getElementById('info-tag');
 const infoTitle = document.getElementById('info-title');
 const infoSubtitle = document.getElementById('info-subtitle');
 const infoDesc = document.getElementById('info-desc');
+const infoTags = document.getElementById('info-tags');
+const detailOverlay = document.getElementById('detail-overlay');
+const detailClose = document.getElementById('detail-close');
+const detailCanvas = document.getElementById('detail-canvas');
+const detailName = document.getElementById('detail-name');
+const detailMeaning = document.getElementById('detail-meaning');
+const detailDesc = document.getElementById('detail-desc');
+const flash = document.getElementById('flash');
 
 // ============================================================
-//  加载进度模拟
+//  加载进度
 // ============================================================
 let loadProgress = 0;
 function advanceLoad(amount, label) {
@@ -296,137 +297,129 @@ function advanceLoad(amount, label) {
             nav.classList.add('show');
             hint.classList.add('show');
             toolbar.classList.add('show');
-            audioInit.classList.add('show');
+            audioBtn.classList.add('show');
         }, 400);
     }
 }
-
-advanceLoad(10, '初始化场景...');
+advanceLoad(5, '初始化场景...');
 
 // ============================================================
-//  Three.js 场景
+//  场景
 // ============================================================
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x080604);
-scene.fog = new THREE.Fog(0x080604, 18, 30);
+scene.fog = new THREE.FogExp2(0x080604, 0.018);
 
-// 相机
-const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 40);
+const camera = new THREE.PerspectiveCamera(38, window.innerWidth / window.innerHeight, 0.1, 45);
 camera.position.set(9, 5, 14);
 
-// 渲染器
 const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.0;
+renderer.toneMappingExposure = 1.1;
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 container.appendChild(renderer.domElement);
 
-advanceLoad(15, '加载渲染引擎...');
-
-// 控制器
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.06;
-controls.minDistance = 4;
-controls.maxDistance = 22;
+controls.minDistance = 3.5;
+controls.maxDistance = 24;
 controls.maxPolarAngle = Math.PI / 2.05;
 controls.target.set(0, 1.2, 0);
 controls.update();
 
-// ===== 后处理 (Bloom) =====
-const composer = new EffectComposer(renderer);
-const renderPass = new RenderPass(scene, camera);
-composer.addPass(renderPass);
+advanceLoad(10, '加载渲染引擎...');
 
+// ===== 后处理 =====
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
 const bloomPass = new UnrealBloomPass(
     new THREE.Vector2(window.innerWidth, window.innerHeight),
-    0.3,  // strength
-    0.4,  // radius
-    0.1   // threshold
+    0.35, 0.5, 0.1
 );
 composer.addPass(bloomPass);
-
-advanceLoad(10, '加载后期特效...');
+advanceLoad(5, '加载后期特效...');
 
 // ============================================================
-//  灯光系统
+//  灯光系统（v3.0 增强版）
 // ============================================================
-// 环境光
-const ambient = new THREE.AmbientLight(0x22110a, 0.3);
-scene.add(ambient);
+scene.add(new THREE.AmbientLight(0x22110a, 0.25));
 
-// 主光 — 暖色
-const mainLight = new THREE.DirectionalLight(0xffddaa, 1.2);
+// 主光
+const mainLight = new THREE.DirectionalLight(0xffddaa, 1.4);
 mainLight.position.set(6, 12, 8);
 mainLight.castShadow = true;
-mainLight.shadow.mapSize.width = 1024;
-mainLight.shadow.mapSize.height = 1024;
+mainLight.shadow.mapSize.set(1024, 1024);
 mainLight.shadow.camera.near = 1;
 mainLight.shadow.camera.far = 25;
 scene.add(mainLight);
 
-// 补光 — 冷色
-const fillLight = new THREE.DirectionalLight(0x8888ff, 0.25);
-fillLight.position.set(-6, 4, -8);
-scene.add(fillLight);
+// 补光
+scene.add(new THREE.DirectionalLight(0x8888ff, 0.2).position.set(-6, 4, -8));
+// 背光
+const rim = new THREE.DirectionalLight(0xd4a853, 0.5);
+rim.position.set(-4, 6, 10);
+scene.add(rim);
 
-// 背光 — 金色轮廓
-const rimLight = new THREE.DirectionalLight(0xd4a853, 0.6);
-rimLight.position.set(-4, 6, 10);
-scene.add(rimLight);
+// 聚光
+const spot1 = new THREE.SpotLight(0xd4a853, 0.9, 20, Math.PI/8, 0.5, 1);
+spot1.position.set(0, 10, 0);
+spot1.target.position.set(0, 0, 0);
+scene.add(spot1); scene.add(spot1.target);
 
-// 顶部聚光
-const spotLight = new THREE.SpotLight(0xd4a853, 0.8, 20, Math.PI/8, 0.5, 1);
-spotLight.position.set(0, 10, 0);
-spotLight.target.position.set(0, 0, 0);
-scene.add(spotLight); scene.add(spotLight.target);
-
-const spot2 = new THREE.SpotLight(0xcd3333, 0.3, 15, Math.PI/10, 0.5);
-spot2.position.set(-4, 8, -3);
-spot2.target.position.set(-4, 0, -3);
+const spot2 = new THREE.SpotLight(0xcd3333, 0.35, 15, Math.PI/10, 0.5);
+spot2.position.set(-5, 8, -4);
+spot2.target.position.set(-5, 0, -4);
 scene.add(spot2); scene.add(spot2.target);
 
 const spot3 = new THREE.SpotLight(0x4488cc, 0.3, 15, Math.PI/10, 0.5);
-spot3.position.set(4, 8, 3);
-spot3.target.position.set(4, 0, 3);
+spot3.position.set(5, 8, 4);
+spot3.target.position.set(5, 0, 4);
 scene.add(spot3); scene.add(spot3.target);
 
-advanceLoad(10, '布置灯光...');
+// 烛光色氛围光
+const warmGlow = new THREE.PointLight(0xd4a853, 0.4, 10);
+warmGlow.position.set(0, 1, 0);
+scene.add(warmGlow);
+
+advanceLoad(5, '布置灯光...');
 
 // ============================================================
-//  地面
+//  镜面反射地面（v3.0 新增）
 // ============================================================
-// 青石地面
-const floorGeo = new THREE.PlaneGeometry(30, 30);
-const floorMat = new THREE.MeshStandardMaterial({
-    color: 0x1a1410, roughness: 0.8, metalness: 0.05
+const floorMirror = new Reflector(30, 30, {
+    clipBias: 0.003,
+    textureWidth: window.innerWidth * 0.5,
+    textureHeight: window.innerHeight * 0.5,
+    color: 0x1a1410,
+    recursive: true
 });
-const floor = new THREE.Mesh(floorGeo, floorMat);
-floor.rotation.x = -Math.PI/2;
-floor.receiveShadow = true;
-scene.add(floor);
+floorMirror.rotation.x = -Math.PI / 2;
+floorMirror.position.y = -0.01;
+scene.add(floorMirror);
 
-// 地砖分割线
-const grid = new THREE.GridHelper(24, 16, 0xd4a853, 0xd4a853);
+// 地砖分割线（在镜面上方一点）
+const grid = new THREE.GridHelper(26, 16, 0xd4a853, 0xd4a853);
 grid.material.transparent = true;
-grid.material.opacity = 0.06;
+grid.material.opacity = 0.04;
+grid.position.y = 0.005;
 scene.add(grid);
 
-advanceLoad(10, '铺设地面...');
+advanceLoad(5, '铺设镜面地板...');
 
 // ============================================================
-//  中式展厅建筑
+//  中式展厅建筑（v3.0 升级版）
 // ============================================================
 function buildGallery() {
     const group = new THREE.Group();
 
-    // --- 立柱 ---
+    // --- 立柱（升级：朱红色 + 更精致）---
     const pillarMat = new THREE.MeshStandardMaterial({
-        color: 0x3a2010, roughness: 0.6, metalness: 0.15
+        color: 0x4a2810, roughness: 0.5, metalness: 0.15
     });
     const pillarPos = [];
     for(let z = -8; z <= 8; z += 4) {
@@ -436,86 +429,199 @@ function buildGallery() {
         }
     }
     pillarPos.forEach(([x, z]) => {
-        const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.25, 4.5, 8), pillarMat);
-        pillar.position.set(x, 2.25, z);
+        const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.28, 4.8, 8), pillarMat);
+        pillar.position.set(x, 2.4, z);
         pillar.castShadow = true;
         group.add(pillar);
+        // 柱础
+        const baseMat = new THREE.MeshStandardMaterial({ color: 0x3a2a1a, roughness: 0.7, metalness: 0.1 });
+        const base = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.38, 0.12, 8), baseMat);
+        base.position.set(x, 0.06, z);
+        group.add(base);
     });
 
-    // --- 横梁 ---
+    // --- 横梁（升级：更粗壮）---
     const beamMat = new THREE.MeshStandardMaterial({
-        color: 0x2a1a0a, roughness: 0.7, metalness: 0.1
+        color: 0x2a1a0a, roughness: 0.6, metalness: 0.1
     });
     for(let i = -8; i <= 8; i += 4) {
-        // 纵向梁
-        const b1 = new THREE.Mesh(new THREE.BoxGeometry(16, 0.08, 0.12), beamMat);
-        b1.position.set(0, 4.5, i); group.add(b1);
-        // 横向梁
-        const b2 = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.08, 16), beamMat);
-        b2.position.set(i, 4.5, 0); group.add(b2);
+        const b1 = new THREE.Mesh(new THREE.BoxGeometry(16, 0.1, 0.14), beamMat);
+        b1.position.set(0, 4.6, i); group.add(b1);
+        const b2 = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.1, 16), beamMat);
+        b2.position.set(i, 4.6, 0); group.add(b2);
     }
 
-    // --- 中式屋顶 (抽象) ---
-    const roofMat = new THREE.MeshStandardMaterial({
-        color: 0x1a0e06, roughness: 0.9, metalness: 0,
-        side: THREE.DoubleSide
+    // --- 斗拱（简化版，v3.0 新增）---
+    const dougongMat = new THREE.MeshStandardMaterial({ color: 0x3a2010, roughness: 0.5, metalness: 0.1 });
+    pillarPos.forEach(([x, z]) => {
+        const dg = new THREE.Group();
+        for(let j=0; j<3; j++) {
+            const arm = new THREE.Mesh(new THREE.BoxGeometry(0.5-j*0.1, 0.06, 0.3), dougongMat);
+            arm.position.set(0, j*0.08, 0);
+            dg.add(arm);
+        }
+        dg.position.set(x, 4.5, z);
+        group.add(dg);
     });
+
+    // --- 屋顶飞檐（升级）---
+    const roofMat = new THREE.MeshStandardMaterial({
+        color: 0x1a0e06, roughness: 0.9, metalness: 0, side: THREE.DoubleSide
+    });
+    const tipMat = new THREE.MeshStandardMaterial({ color: 0x6b4a2a, roughness: 0.4, metalness: 0.3 });
+
     for(let z = -7; z <= 7; z += 7) {
         for(let x = -7; x <= 7; x += 7) {
             if(Math.abs(x) < 5 && Math.abs(z) < 5) continue;
-            // 屋檐
             const eave = new THREE.Mesh(new THREE.BoxGeometry(3.8, 0.06, 3.8), roofMat);
-            eave.position.set(x, 4.55, z);
-            eave.rotation.x = 0.05;
+            eave.position.set(x, 4.7, z);
+            eave.rotation.x = 0.06;
             group.add(eave);
-            // 翘角 (小装饰)
-            const tipMat = new THREE.MeshStandardMaterial({
-                color: 0x5a3a1a, roughness: 0.5, metalness: 0.3
-            });
-            for(let tx of [-1.8, 1.8]) {
-                for(let tz of [-1.8, 1.8]) {
-                    const tip = new THREE.Mesh(
-                        new THREE.ConeGeometry(0.08, 0.25, 4),
-                        tipMat
-                    );
-                    tip.position.set(x + tx, 4.7, z + tz);
-                    tip.rotation.x = 0.15;
-                    group.add(tip);
-                }
+
+            // 飞檐翘角 — 脊兽（v3.0 升级）
+            for(let s of [[-1.8,-1.8],[-1.8,1.8],[1.8,-1.8],[1.8,1.8]]) {
+                const tip = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.3, 4), tipMat);
+                tip.position.set(x+s[0], 4.88, z+s[1]);
+                tip.rotation.x = 0.2;
+                group.add(tip);
+                // 小兽装饰
+                const beast = new THREE.Mesh(new THREE.SphereGeometry(0.04, 4, 4), tipMat);
+                beast.position.set(x+s[0]*0.85, 4.72, z+s[1]*0.85);
+                group.add(beast);
             }
         }
     }
 
-    // --- 顶部发光藻井 ---
+    // --- 匾额（v3.0 新增）---
+    const plaqueCanvas = document.createElement('canvas');
+    plaqueCanvas.width = 512; plaqueCanvas.height = 160;
+    const pctx = plaqueCanvas.getContext('2d');
+    pctx.fillStyle = '#1a0e06'; pctx.fillRect(0, 0, 512, 160);
+    // 边框
+    pctx.strokeStyle = '#d4a853'; pctx.lineWidth = 4;
+    pctx.strokeRect(10, 10, 492, 140);
+    pctx.strokeStyle = 'rgba(212,168,83,0.3)'; pctx.lineWidth = 1;
+    pctx.strokeRect(20, 20, 472, 120);
+    // 文字
+    pctx.fillStyle = '#d4a853'; pctx.font = 'bold 72px "Ma Shan Zheng", serif';
+    pctx.textAlign = 'center'; pctx.textBaseline = 'middle';
+    pctx.shadowColor = 'rgba(212,168,83,0.3)'; pctx.shadowBlur = 20;
+    pctx.fillText('金陵纹影', 256, 85);
+    pctx.shadowBlur = 0;
+
+    const plaqueTex = new THREE.CanvasTexture(plaqueCanvas);
+    const plaqueMat = new THREE.MeshStandardMaterial({ map: plaqueTex, roughness: 0.6, metalness: 0.2 });
+    const plaque = new THREE.Mesh(new THREE.PlaneGeometry(2.4, 0.75), plaqueMat);
+    plaque.position.set(0, 4.3, -7.8);
+    group.add(plaque);
+
+    // --- 藻井（v3.0 升级）---
     const glowCanvas = document.createElement('canvas');
     glowCanvas.width = 512; glowCanvas.height = 512;
     const gctx = glowCanvas.getContext('2d');
     const grad = gctx.createRadialGradient(256, 256, 0, 256, 256, 256);
     grad.addColorStop(0, '#d4a853');
-    grad.addColorStop(0.2, '#d4a85344');
-    grad.addColorStop(0.5, '#d4a85311');
+    grad.addColorStop(0.15, '#d4a85333');
+    grad.addColorStop(0.4, '#d4a85311');
     grad.addColorStop(1, 'transparent');
     gctx.fillStyle = grad; gctx.fillRect(0, 0, 512, 512);
-    // 八边形图案
-    gctx.strokeStyle = 'rgba(212,168,83,0.15)';
-    gctx.lineWidth = 2;
-    const pts = 8; const cx=256, cy=256, r=160;
-    gctx.beginPath();
-    for(let i=0; i<=pts; i++) {
-        const a = (i/pts)*Math.PI*2 - Math.PI/2;
-        const px = cx + r*Math.cos(a), py = cy + r*Math.sin(a);
-        i===0 ? gctx.moveTo(px, py) : gctx.lineTo(px, py);
+    // 八边形（多层）
+    for(let ring=0; ring<3; ring++) {
+        gctx.strokeStyle = `rgba(212,168,83,${0.1 - ring*0.025})`;
+        gctx.lineWidth = 2 - ring*0.5;
+        const pts = 8;
+        const r = 140 - ring*20;
+        gctx.beginPath();
+        for(let i=0; i<=pts; i++) {
+            const a = (i/pts)*Math.PI*2 - Math.PI/2;
+            gctx.lineTo(256 + r*Math.cos(a), 256 + r*Math.sin(a));
+        }
+        gctx.stroke();
     }
-    gctx.stroke();
+    // 中心龙纹抽象
+    gctx.strokeStyle = 'rgba(212,168,83,0.08)';
+    gctx.lineWidth = 1;
+    for(let i=0; i<6; i++) {
+        const a = (i/6)*Math.PI*2;
+        gctx.beginPath();
+        gctx.moveTo(256, 256);
+        gctx.quadraticCurveTo(
+            256 + 60*Math.cos(a+0.3), 256 + 60*Math.sin(a+0.3),
+            256 + 40*Math.cos(a), 256 + 40*Math.sin(a)
+        );
+        gctx.stroke();
+    }
 
     const ceilTex = new THREE.CanvasTexture(glowCanvas);
     const ceilGlow = new THREE.Mesh(
         new THREE.PlaneGeometry(14, 14),
-        new THREE.MeshBasicMaterial({ map: ceilTex, transparent: true, opacity: 0.25, depthWrite: false })
+        new THREE.MeshBasicMaterial({ map: ceilTex, transparent: true, opacity: 0.2, depthWrite: false })
     );
     ceilGlow.rotation.x = -Math.PI/2;
-    ceilGlow.position.set(0, 4.6, 0);
+    ceilGlow.position.set(0, 4.75, 0);
     group.add(ceilGlow);
+
+    // --- 花格窗墙面（v3.0 新增）---
+    function createLatticeTexture() {
+        const c = document.createElement('canvas');
+        c.width = 512; c.height = 512;
+        const ctx = c.getContext('2d');
+        ctx.fillStyle = '#1a1410';
+        ctx.fillRect(0, 0, 512, 512);
+        ctx.strokeStyle = 'rgba(60,38,20,0.25)';
+        ctx.lineWidth = 3;
+        // 步步锦窗格
+        const step = 64;
+        for(let i=0; i<8; i++) {
+            for(let j=0; j<8; j++) {
+                const x=i*step, y=j*step;
+                ctx.strokeRect(x+6, y+6, step-12, step-12);
+                // 对角线
+                ctx.globalAlpha = 0.3;
+                ctx.beginPath();
+                ctx.moveTo(x+6, y+6); ctx.lineTo(x+step-6, y+step-6);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(x+step-6, y+6); ctx.lineTo(x+6, y+step-6);
+                ctx.stroke();
+                ctx.globalAlpha = 1;
+            }
+        }
+        // 暗纹
+        ctx.fillStyle = 'rgba(212,168,83,0.02)';
+        for(let i=0; i<16; i++) {
+            ctx.beginPath();
+            ctx.arc(32+i*32, 256, 2, 0, Math.PI*2);
+            ctx.fill();
+        }
+        return c;
+    }
+
+    const latticeMat = new THREE.MeshStandardMaterial({
+        map: new THREE.CanvasTexture(createLatticeTexture()),
+        roughness: 0.8, metalness: 0.05, transparent: true, opacity: 0.6, side: THREE.DoubleSide
+    });
+
+    // 后墙（展板之间）— 用花格窗填充
+    for(let z = -1; z <= 1; z += 2) {
+        for(let x = -5; x <= 5; x += 4) {
+            if(Math.abs(x) < 2) continue;
+            const wall = new THREE.Mesh(new THREE.PlaneGeometry(3.2, 4.2), latticeMat);
+            wall.position.set(x, 2.2, z * 7.9);
+            wall.rotation.y = z > 0 ? Math.PI : 0;
+            group.add(wall);
+        }
+    }
+    // 侧墙
+    for(let x = -1; x <= 1; x += 2) {
+        for(let z = -5; z <= 5; z += 4) {
+            if(Math.abs(z) < 2) continue;
+            const wall = new THREE.Mesh(new THREE.PlaneGeometry(3.2, 4.2), latticeMat);
+            wall.position.set(x * 7.9, 2.2, z);
+            wall.rotation.y = x > 0 ? Math.PI/2 : -Math.PI/2;
+            group.add(wall);
+        }
+    }
 
     group.position.y = 0;
     return group;
@@ -524,188 +630,218 @@ scene.add(buildGallery());
 advanceLoad(10, '搭建展厅...');
 
 // ============================================================
-//  展台柱
+//  展台柱（升级版）
 // ============================================================
 function createPedestal(x, z, height=0.6) {
     const g = new THREE.Group();
-    const mat = new THREE.MeshStandardMaterial({
-        color: 0x2a1f14, roughness: 0.6, metalness: 0.2
-    });
-    const base = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.7, 0.15, 8), mat);
-    base.position.y = 0.075; base.receiveShadow = true; base.castShadow = true;
+    const mat = new THREE.MeshStandardMaterial({ color: 0x2a1f14, roughness: 0.5, metalness: 0.2 });
+    const base = new THREE.Mesh(new THREE.CylinderGeometry(0.65, 0.75, 0.12, 8), mat);
+    base.position.y = 0.06; base.receiveShadow = true; base.castShadow = true;
     g.add(base);
 
-    const col = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.25, height, 8), mat);
-    col.position.y = height/2 + 0.15; col.castShadow = true;
+    const col = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.28, height, 8), mat);
+    col.position.y = height/2 + 0.12; col.castShadow = true;
     g.add(col);
 
-    const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.25, 0.1, 8), mat);
-    cap.position.y = height + 0.2; cap.castShadow = true;
+    const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.28, 0.1, 8), mat);
+    cap.position.y = height + 0.17; cap.castShadow = true;
     g.add(cap);
+
+    // 金色装饰环（v3.0）
+    const ringMat = new THREE.MeshStandardMaterial({ color: 0xd4a853, roughness: 0.3, metalness: 0.6 });
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(0.3, 0.025, 6, 12), ringMat);
+    ring.position.y = height + 0.12;
+    ring.rotation.x = Math.PI/2;
+    g.add(ring);
 
     g.position.set(x, 0, z);
     return g;
 }
 
-[ [-5.5,0], [5.5,0], [0,-5.5], [0,5.5] ].forEach(p => {
-    scene.add(createPedestal(p[0], p[1], 0.5));
-});
+[[-5.5,0],[5.5,0],[0,-5.5],[0,5.5]].forEach(p => scene.add(createPedestal(p[0], p[1], 0.5)));
 
 // ============================================================
-//  展品 — 华丽丝绸卷轴
+//  纹样生成引擎（v3.0 升级版）
 // ============================================================
-function generateBrocadeTexture(name, colorHex, isAI=false) {
+function generateBrocadeTexture(name, colorHex, isAI=false, isDetail=false) {
+    const size = isDetail ? 2048 : 1024;
     const c = document.createElement('canvas');
-    c.width = 1024; c.height = 1024;
+    c.width = size; c.height = size;
     const ctx = c.getContext('2d');
+    const cx = size/2, cy = size/2;
 
-    // 1. 基底 — 仿古绢
-    const grad = ctx.createRadialGradient(512, 512, 0, 512, 512, 600);
-    grad.addColorStop(0, isAI ? '#1a2a18' : '#1a1410');
-    grad.addColorStop(0.5, isAI ? '#0f1a0e' : '#0f0a06');
-    grad.addColorStop(1, '#060402');
-    ctx.fillStyle = grad; ctx.fillRect(0, 0, 1024, 1024);
+    // 1. 基底 — 仿古绢（更细腻）
+    const baseGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, size*0.7);
+    baseGrad.addColorStop(0, isAI ? '#1a2a18' : '#1a1410');
+    baseGrad.addColorStop(0.5, isAI ? '#0f1a0e' : '#0f0a06');
+    baseGrad.addColorStop(1, '#060402');
+    ctx.fillStyle = baseGrad; ctx.fillRect(0, 0, size, size);
 
-    // 2. 暗纹底纹
-    ctx.strokeStyle = `rgba(212,168,83,0.03)`;
-    ctx.lineWidth = 0.5;
-    for(let i=0; i<1024; i+=64) {
-        ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,1024); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(0,i); ctx.lineTo(1024,i); ctx.stroke();
+    // 2. 绢帛纹理（细密经纬线）
+    for(let i=0; i<size; i+=isDetail?2:4) {
+        ctx.strokeStyle = `rgba(212,168,83,0.015)`;
+        ctx.lineWidth = 0.5;
+        ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,size); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(0,i); ctx.lineTo(size,i); ctx.stroke();
     }
 
-    const cx=512, cy=512, hex=colorHex;
+    // 3. 暗八仙纹底
+    ctx.strokeStyle = `rgba(212,168,83,0.03)`;
+    ctx.lineWidth = 0.5;
+    for(let ring=0; ring<4; ring++) {
+        const n = 8 + ring*2;
+        const r = size*0.15 + ring*size*0.08;
+        for(let i=0; i<n; i++) {
+            const a = (i/n)*Math.PI*2 + ring*0.4;
+            const px = cx + r*Math.cos(a);
+            const py = cy + r*Math.sin(a);
+            ctx.beginPath();
+            ctx.arc(px, py, size*0.008, 0, Math.PI*2);
+            ctx.stroke();
+        }
+    }
+
+    ctx.shadowColor = colorHex;
+    ctx.shadowBlur = isDetail ? 40 : 20;
 
     if(isAI) {
-        // AI 风格 — 抽象像素化云锦
-        const colors = ['#6b8e23','#d4a853','#cd3333','#4a7a9c','#8b6914'];
-        ctx.shadowColor = '#d4a853';
-        ctx.shadowBlur = 15;
-        for(let ring=0; ring<6; ring++) {
-            const n = 8 + ring*2;
-            const r = 80 + ring*55;
+        // AI 风格 — 抽象像素化云锦（v3.0 升级：更多层次）
+        const colors = ['#6b8e23','#d4a853','#cd3333','#4a7a9c','#8b6914','#5a3a8a'];
+        for(let ring=0; ring<8; ring++) {
+            const n = 6 + ring*2;
+            const r = size*0.08 + ring*size*0.055;
             for(let i=0; i<n; i++) {
                 const a = (i/n)*Math.PI*2 + ring*0.3;
                 const px = cx + r*Math.cos(a);
                 const py = cy + r*Math.sin(a);
-                const col = colors[(ring+i)%colors.length];
-                ctx.fillStyle = col;
-                ctx.globalAlpha = 0.15 + ring*0.03;
+                ctx.fillStyle = colors[(ring+i)%colors.length];
+                ctx.globalAlpha = 0.08 + ring*0.025;
                 ctx.beginPath();
-                ctx.arc(px, py, 18 - ring*1.5, 0, Math.PI*2);
+                ctx.arc(px, py, size*0.02 - ring*size*0.001, 0, Math.PI*2);
                 ctx.fill();
             }
         }
+        // 中心发光
+        const cGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, size*0.1);
+        cGrad.addColorStop(0, '#d4a853');
+        cGrad.addColorStop(0.3, '#6b8e23');
+        cGrad.addColorStop(1, 'transparent');
+        ctx.fillStyle = cGrad; ctx.globalAlpha = 0.5;
+        ctx.beginPath(); ctx.arc(cx, cy, size*0.1, 0, Math.PI*2); ctx.fill();
         ctx.shadowBlur = 0;
         ctx.globalAlpha = 1;
     } else {
-        // 传统云锦纹样 — 精细团花
-        ctx.shadowColor = hex;
-        ctx.shadowBlur = 20;
+        // 传统云锦纹样（v3.0 升级：五层结构，更精细）
+        ctx.shadowBlur = isDetail ? 30 : 15;
 
-        // 外圈 — 八宝环绕
-        for(let i=0; i<8; i++) {
-            const a = (i/8)*Math.PI*2;
-            const r = 220;
-            const px = cx + r*Math.cos(a);
-            const py = cy + r*Math.sin(a);
-            ctx.fillStyle = hex; ctx.globalAlpha = 0.1;
-            ctx.beginPath();
-            ctx.arc(px, py, 35, 0, Math.PI*2);
-            ctx.fill();
-            ctx.strokeStyle = hex; ctx.globalAlpha = 0.25;
-            ctx.lineWidth = 2;
-            ctx.stroke();
-        }
-
-        // 中圈 — 缠枝牡丹
-        for(let i=0; i<12; i++) {
-            const a = (i/12)*Math.PI*2;
-            const r = 150;
-            const petalX = cx + r*Math.cos(a);
-            const petalY = cy + r*Math.sin(a);
-            ctx.save();
-            ctx.translate(petalX, petalY);
-            ctx.rotate(a);
-            ctx.beginPath();
-            ctx.ellipse(0, 0, 50, 22, 0, 0, Math.PI*2);
-            ctx.fillStyle = hex; ctx.globalAlpha = 0.08;
-            ctx.fill();
-            ctx.strokeStyle = hex; ctx.globalAlpha = 0.3;
-            ctx.lineWidth = 1.5; ctx.stroke();
-            ctx.restore();
-        }
-
-        // 中圈小点缀
-        for(let i=0; i<24; i++) {
-            const a = (i/24)*Math.PI*2;
-            const r = 120;
-            const px = cx + r*Math.cos(a);
-            const py = cy + r*Math.sin(a);
-            ctx.fillStyle = '#d4a853'; ctx.globalAlpha = 0.12;
-            ctx.beginPath(); ctx.arc(px, py, 6, 0, Math.PI*2); ctx.fill();
-        }
-
-        // 内圈 — 八瓣团花
+        // 第一层：外圈如意云纹（8个）
         for(let i=0; i<8; i++) {
             const a = (i/8)*Math.PI*2 - Math.PI/2;
-            const r = 70;
+            const r = size*0.22;
+            const px = cx + r*Math.cos(a);
+            const py = cy + r*Math.sin(a);
+            ctx.fillStyle = colorHex; ctx.globalAlpha = 0.07;
+            ctx.beginPath();
+            ctx.arc(px, py, size*0.04, 0, Math.PI*2); ctx.fill();
+            ctx.strokeStyle = colorHex; ctx.globalAlpha = 0.15;
+            ctx.lineWidth = isDetail ? 3 : 2; ctx.stroke();
+            // 如意头
+            ctx.beginPath();
+            ctx.arc(px - size*0.02*Math.cos(a), py - size*0.02*Math.sin(a), size*0.015, 0, Math.PI*2);
+            ctx.fillStyle = '#d4a853'; ctx.globalAlpha = 0.1; ctx.fill();
+        }
+
+        // 第二层：缠枝牡丹（翻倍到16朵）
+        for(let i=0; i<16; i++) {
+            const a = (i/16)*Math.PI*2;
+            const r = size*0.15;
             const px = cx + r*Math.cos(a);
             const py = cy + r*Math.sin(a);
             ctx.save();
             ctx.translate(px, py);
             ctx.rotate(a);
             ctx.beginPath();
-            ctx.ellipse(0, 0, 45, 18, 0, 0, Math.PI*2);
-            ctx.fillStyle = hex; ctx.globalAlpha = 0.2;
-            ctx.fill();
-            ctx.strokeStyle = '#d4a853'; ctx.globalAlpha = 0.5;
-            ctx.lineWidth = 1.5; ctx.stroke();
+            ctx.ellipse(0, 0, size*0.05, size*0.025, 0, 0, Math.PI*2);
+            ctx.fillStyle = colorHex; ctx.globalAlpha = 0.06; ctx.fill();
+            ctx.strokeStyle = colorHex; ctx.globalAlpha = 0.2;
+            ctx.lineWidth = isDetail ? 2 : 1.5; ctx.stroke();
+            // 花蕊
+            ctx.fillStyle = '#d4a853'; ctx.globalAlpha = 0.1;
+            ctx.beginPath(); ctx.arc(0, 0, size*0.006, 0, Math.PI*2); ctx.fill();
             ctx.restore();
         }
 
-        // 花蕊
-        const grad2 = ctx.createRadialGradient(cx, cy, 0, cx, cy, 35);
-        grad2.addColorStop(0, '#d4a853');
-        grad2.addColorStop(0.3, hex);
-        grad2.addColorStop(1, hex + '00');
-        ctx.fillStyle = grad2; ctx.globalAlpha = 0.7;
-        ctx.beginPath(); ctx.arc(cx, cy, 35, 0, Math.PI*2); ctx.fill();
+        // 第三层：金线环
+        for(let i=0; i<32; i++) {
+            const a = (i/32)*Math.PI*2;
+            const r = size*0.12;
+            const px = cx + r*Math.cos(a);
+            const py = cy + r*Math.sin(a);
+            ctx.fillStyle = '#d4a853'; ctx.globalAlpha = 0.08;
+            ctx.beginPath(); ctx.arc(px, py, size*0.005, 0, Math.PI*2); ctx.fill();
+        }
 
-        // 金线描边
-        ctx.shadowBlur = 30;
-        ctx.strokeStyle = '#d4a853'; ctx.globalAlpha = 0.4;
-        ctx.lineWidth = 1.5;
-        ctx.beginPath(); ctx.arc(cx, cy, 280, 0, Math.PI*2); ctx.stroke();
+        // 第四层：八瓣团花（加大）
+        for(let i=0; i<8; i++) {
+            const a = (i/8)*Math.PI*2 - Math.PI/2;
+            const r = size*0.07;
+            const px = cx + r*Math.cos(a);
+            const py = cy + r*Math.sin(a);
+            ctx.save();
+            ctx.translate(px, py);
+            ctx.rotate(a);
+            ctx.beginPath();
+            ctx.ellipse(0, 0, size*0.045, size*0.02, 0, 0, Math.PI*2);
+            ctx.fillStyle = colorHex; ctx.globalAlpha = 0.15; ctx.fill();
+            ctx.strokeStyle = '#d4a853'; ctx.globalAlpha = 0.35;
+            ctx.lineWidth = isDetail ? 2.5 : 1.5; ctx.stroke();
+            ctx.restore();
+        }
+
+        // 第五层：花蕊 + 金线描边
+        const cGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, size*0.04);
+        cGrad.addColorStop(0, '#ffdd88');
+        cGrad.addColorStop(0.2, '#d4a853');
+        cGrad.addColorStop(0.5, colorHex);
+        cGrad.addColorStop(1, colorHex + '00');
+        ctx.fillStyle = cGrad; ctx.globalAlpha = 0.65;
+        ctx.beginPath(); ctx.arc(cx, cy, size*0.04, 0, Math.PI*2); ctx.fill();
+
+        // 金线描边（外圈大环）
+        ctx.shadowBlur = isDetail ? 40 : 25;
+        ctx.strokeStyle = '#d4a853'; ctx.globalAlpha = 0.3;
+        ctx.lineWidth = isDetail ? 2.5 : 1.5;
+        ctx.beginPath(); ctx.arc(cx, cy, size*0.28, 0, Math.PI*2); ctx.stroke();
 
         ctx.shadowBlur = 0;
         ctx.globalAlpha = 1;
     }
 
-    // 标题
+    // 标题（纹样底部）
     ctx.shadowBlur = 0;
-    ctx.fillStyle = 'rgba(212,168,83,0.6)';
-    ctx.font = '28px "SimSun", serif';
+    ctx.fillStyle = 'rgba(212,168,83,0.5)';
+    ctx.font = `${isDetail ? 36 : 24}px "SimSun", serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'bottom';
-    ctx.fillText(name, 512, 1000);
+    ctx.fillText(name, cx, size - 20);
 
     return c;
 }
 
-// 创建丝绸卷轴展板
+// ============================================================
+//  丝绸卷轴展板（v3.0 升级）
+// ============================================================
 const scrollPanels = [];
+const clickablePanels = [];
+
 PATTERNS.forEach((p, i) => {
     const g = new THREE.Group();
+    const fw = 2.6, fh = 3.0;
 
-    // 金色画框
-    const frameMat = new THREE.MeshStandardMaterial({
-        color: 0x4a2a12, roughness: 0.5, metalness: 0.4
-    });
-    const fw = 2.6, fh = 3.0, fd = 0.08;
-
+    // 展板装饰框（更精致）
+    const frameMat = new THREE.MeshStandardMaterial({ color: 0x4a2a12, roughness: 0.4, metalness: 0.4 });
     const addFrameBar = (w, h, dx, dy) => {
-        const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, fd), frameMat);
+        const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, 0.08), frameMat);
         m.position.set(dx, dy, 0); m.castShadow = true; return m;
     };
     g.add(addFrameBar(fw+0.15, 0.05, 0, fh/2));
@@ -713,52 +849,60 @@ PATTERNS.forEach((p, i) => {
     g.add(addFrameBar(0.05, fh, -fw/2, 0));
     g.add(addFrameBar(0.05, fh, fw/2, 0));
 
-    // 角饰
-    const cornerMat = new THREE.MeshStandardMaterial({
-        color: 0xd4a853, roughness: 0.3, metalness: 0.6
-    });
+    // 金色角饰（卷轴轴头风格）
+    const cornerMat = new THREE.MeshStandardMaterial({ color: 0xd4a853, roughness: 0.2, metalness: 0.7 });
     for(let sx of [-1,1]) for(let sy of [-1,1]) {
-        const corner = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.06, 6), cornerMat);
-        corner.position.set(sx*fw/2, sy*fh/2, fd/2+0.01);
+        const corner = new THREE.Mesh(new THREE.CylinderGeometry(0.065, 0.065, 0.06, 6), cornerMat);
+        corner.position.set(sx*fw/2, sy*fh/2, 0.05);
         corner.rotation.y = Math.PI/6;
         g.add(corner);
     }
 
-    // 画布
     const canvas = generateBrocadeTexture(p.name, p.color, i === PATTERNS.length-1);
     const tex = new THREE.CanvasTexture(canvas);
     tex.anisotropy = 4;
     tex.colorSpace = THREE.SRGBColorSpace;
 
     const panelMat = new THREE.MeshStandardMaterial({
-        map: tex, roughness: 0.5, metalness: 0.05,
+        map: tex, roughness: 0.45, metalness: 0.05,
         emissive: new THREE.Color(p.color), emissiveIntensity: 0.04
     });
     const panel = new THREE.Mesh(new THREE.PlaneGeometry(fw, fh), panelMat);
     panel.position.z = 0.01;
+    panel.userData = { patternIndex: i, isPattern: true };
     g.add(panel);
+    clickablePanels.push(panel);
 
-    // 发光
+    // 发光背板
     const glowMat = new THREE.MeshBasicMaterial({
-        color: p.color, transparent: true, opacity: 0.03
+        color: p.color, transparent: true, opacity: 0.025
     });
     const glow = new THREE.Mesh(new THREE.PlaneGeometry(fw+0.3, fh+0.3), glowMat);
     glow.position.z = -0.02;
     g.add(glow);
 
-    // 位置 — 矩形围廊布局
+    // 名称标签（3D 文字替代）— 底部小标签
+    const labelMat = new THREE.MeshStandardMaterial({
+        color: 0xd4a853, roughness: 0.5, metalness: 0.3,
+        transparent: true, opacity: 0.6
+    });
+    const label = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 0.12), labelMat);
+    label.position.set(0, -fh/2 - 0.1, 0.01);
+    g.add(label);
+
+    // 位置 — 矩形围廊布局（v3.0 稍微拉开间距）
     const cols = 4;
     const row = Math.floor(i / cols);
     const col = i % cols;
-    const spacingX = 3.2;
-    const spacingZ = 3.5;
-    const startX = - (cols-1) * spacingX / 2;
+    const spacingX = 3.4;
+    const spacingZ = 3.6;
+    const startX = -(cols-1)*spacingX/2;
 
     if(row === 0) {
-        g.position.set(startX + col * spacingX, 1.8, -7.5);
+        g.position.set(startX + col*spacingX, 1.8, -7.8);
         g.rotation.y = 0;
     } else {
-        g.position.set(startX + col * spacingX, 1.8, 7.5);
+        g.position.set(startX + col*spacingX, 1.8, 7.8);
         g.rotation.y = Math.PI;
     }
 
@@ -766,104 +910,135 @@ PATTERNS.forEach((p, i) => {
     scrollPanels.push(g);
 });
 
-advanceLoad(15, '绘制纹样...');
+advanceLoad(15, '绘制精美纹样...');
 
 // ============================================================
-//  中央主展品
+//  中央主展品（升级）
 // ============================================================
-const mainCanvas = generateBrocadeTexture('龙凤呈祥', '#cd3333', false);
+const mainCanvas = generateBrocadeTexture('龙凤呈祥', '#cd3333', false, true);
 const mainTex = new THREE.CanvasTexture(mainCanvas);
 mainTex.anisotropy = 4;
 mainTex.colorSpace = THREE.SRGBColorSpace;
 
 const mainPanelMat = new THREE.MeshStandardMaterial({
-    map: mainTex, roughness: 0.4, metalness: 0.05,
+    map: mainTex, roughness: 0.35, metalness: 0.05,
     emissive: new THREE.Color(0xcd3333), emissiveIntensity: 0.06
 });
 const mainPanel = new THREE.Mesh(new THREE.PlaneGeometry(3.8, 4.2), mainPanelMat);
 mainPanel.position.set(0, 2.2, -0.02);
-mainPanel.rotation.y = 0;
+mainPanel.userData = { isMain: true };
 
-// 大画框
 const mainGroup = new THREE.Group();
-const mfMat = new THREE.MeshStandardMaterial({ color: 0x5a3a1a, roughness: 0.4, metalness: 0.5 });
+const mfMat = new THREE.MeshStandardMaterial({ color: 0x5a3a1a, roughness: 0.3, metalness: 0.5 });
 const mfw = 4.2, mfh = 4.6;
 for(let sx of [-1,1]) {
     const bar = new THREE.Mesh(new THREE.BoxGeometry(0.08, mfh, 0.12), mfMat);
-    bar.position.set(sx * mfw/2, 0, 0); mainGroup.add(bar);
+    bar.position.set(sx*mfw/2, 0, 0); mainGroup.add(bar);
 }
 for(let sy of [-1,1]) {
     const bar = new THREE.Mesh(new THREE.BoxGeometry(mfw, 0.08, 0.12), mfMat);
-    bar.position.set(0, sy * mfh/2, 0); mainGroup.add(bar);
+    bar.position.set(0, sy*mfh/2, 0); mainGroup.add(bar);
 }
 
-// 龙纹浮雕装饰角
-const dragonMat = new THREE.MeshStandardMaterial({
-    color: 0xd4a853, roughness: 0.2, metalness: 0.8
-});
+// 龙纹浮雕装饰角（加大）
+const dragonMat = new THREE.MeshStandardMaterial({ color: 0xd4a853, roughness: 0.15, metalness: 0.85 });
 for(let sx of [-1,1]) for(let sy of [-1,1]) {
-    const d = new THREE.Mesh(new THREE.TorusGeometry(0.12, 0.04, 8, 16), dragonMat);
-    d.position.set(sx * mfw/2, sy * mfh/2, 0.08);
+    const d = new THREE.Mesh(new THREE.TorusGeometry(0.14, 0.04, 8, 16), dragonMat);
+    d.position.set(sx*mfw/2, sy*mfh/2, 0.08);
     mainGroup.add(d);
+    const dot = new THREE.Mesh(new THREE.SphereGeometry(0.03, 6, 6), dragonMat);
+    dot.position.set(sx*mfw/2, sy*mfh/2, 0.14);
+    mainGroup.add(dot);
 }
 
 mainGroup.add(mainPanel);
 mainGroup.position.set(0, 2.2, -3.5);
 scene.add(mainGroup);
+clickablePanels.push(mainPanel);
+
+advanceLoad(5, '布置主展品...');
 
 // ============================================================
-//  灯笼
+//  灯笼（v3.0 升级 — 可动画）
 // ============================================================
+const lanternGroup = new THREE.Group();
+const lanternData = [];
+
 function createLantern(x, y, z) {
     const g = new THREE.Group();
+    // 灯笼骨
     const bodyMat = new THREE.MeshStandardMaterial({
-        color: 0xcc3333, roughness: 0.4, metalness: 0.1, transparent: true, opacity: 0.85
+        color: 0xcc3333, roughness: 0.35, metalness: 0.1, transparent: true, opacity: 0.82
     });
-    const body = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.3, 0.5, 12), bodyMat);
+    const body = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.33, 0.55, 12), bodyMat);
     body.position.y = 0.25; body.castShadow = true;
     g.add(body);
 
+    // 内部烛光
     const glowMat = new THREE.MeshBasicMaterial({
-        color: 0xd4a853, transparent: true, opacity: 0.3
+        color: 0xffaa44, transparent: true, opacity: 0.35
     });
-    const glow = new THREE.Mesh(new THREE.SphereGeometry(0.15, 8, 8), glowMat);
+    const glow = new THREE.Mesh(new THREE.SphereGeometry(0.18, 8, 8), glowMat);
     glow.position.y = 0.25;
     g.add(glow);
 
-    const topMat = new THREE.MeshStandardMaterial({ color: 0xd4a853, roughness: 0.3, metalness: 0.5 });
-    const top = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.06, 0.04, 6), topMat);
-    top.position.y = 0.52; g.add(top);
+    // 金色顶/底
+    const topMat = new THREE.MeshStandardMaterial({ color: 0xd4a853, roughness: 0.2, metalness: 0.6 });
+    const top = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.07, 0.04, 6), topMat);
+    top.position.y = 0.55; g.add(top);
+    const bottom = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.07, 0.04, 6), topMat);
+    bottom.position.y = -0.03; g.add(bottom);
 
-    const tassel = new THREE.Mesh(new THREE.CylinderGeometry(0.01, 0.02, 0.12, 4), topMat);
-    tassel.position.y = -0.06; g.add(tassel);
+    // 穗子
+    const tasselMat = new THREE.MeshStandardMaterial({ color: 0xd4a853, roughness: 0.5, metalness: 0.2 });
+    const tassel = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.02, 0.15, 4), tasselMat);
+    tassel.position.y = -0.08; g.add(tassel);
+
+    // 挂线
+    const lineMat = new THREE.MeshBasicMaterial({ color: 0x2a1a0a });
+    const line = new THREE.Mesh(new THREE.CylinderGeometry(0.004, 0.004, 0.3, 3), lineMat);
+    line.position.y = 0.7; g.add(line);
 
     g.position.set(x, y, z);
     return g;
 }
 
 const lanternPos = [
-    [-4, 4.2, -4], [4, 4.2, -4], [-4, 4.2, 4], [4, 4.2, 4],
-    [-6, 4.2, 0], [6, 4.2, 0], [0, 4.2, -6], [0, 4.2, 6]
+    [-4.5, 4.3, -4.5], [4.5, 4.3, -4.5], [-4.5, 4.3, 4.5], [4.5, 4.3, 4.5],
+    [-6.5, 4.3, 0], [6.5, 4.3, 0], [0, 4.3, -6.5], [0, 4.3, 6.5]
 ];
-lanternPos.forEach(p => scene.add(createLantern(p[0], p[1], p[2])));
+lanternPos.forEach((p, i) => {
+    const l = createLantern(p[0], p[1], p[2]);
+    lanternGroup.add(l);
+    lanternData.push({
+        group: l,
+        basePos: new THREE.Vector3(p[0], p[1], p[2]),
+        phase: i * 0.7,
+        glowIntensity: 0.3 + Math.random() * 0.15
+    });
+});
+scene.add(lanternGroup);
 
-advanceLoad(10, '装点灯笼...');
+advanceLoad(5, '装点灯笼...');
 
 // ============================================================
-//  粒子系统 — 金粉飘洒
+//  粒子系统 — 金粉飘洒（v3.0 升级版）
 // ============================================================
-const particleCount = 1200;
+const particleCount = 2500;
 const pGeo = new THREE.BufferGeometry();
 const pPos = new Float32Array(particleCount * 3);
 const pSizes = new Float32Array(particleCount);
 const pSpeeds = new Float32Array(particleCount);
+const pDrifts = new Float32Array(particleCount * 2);
 
 for(let i=0; i<particleCount; i++) {
-    pPos[i*3] = (Math.random()-0.5)*28;
+    pPos[i*3] = (Math.random()-0.5)*30;
     pPos[i*3+1] = Math.random()*8;
-    pPos[i*3+2] = (Math.random()-0.5)*28;
-    pSizes[i] = 0.02 + Math.random()*0.06;
-    pSpeeds[i] = 0.2 + Math.random()*0.5;
+    pPos[i*3+2] = (Math.random()-0.5)*30;
+    pSizes[i] = 0.015 + Math.random()*0.07;
+    pSpeeds[i] = 0.15 + Math.random()*0.5;
+    pDrifts[i*2] = (Math.random()-0.5)*0.1;
+    pDrifts[i*2+1] = (Math.random()-0.5)*0.1;
 }
 pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
 pGeo.setAttribute('size', new THREE.BufferAttribute(pSizes, 1));
@@ -872,38 +1047,67 @@ const pTex = (()=>{
     const c=document.createElement('canvas'); c.width=32; c.height=32;
     const ctx=c.getContext('2d');
     const g=ctx.createRadialGradient(16,16,0,16,16,16);
-    g.addColorStop(0,'rgba(212,168,83,1)');
-    g.addColorStop(0.3,'rgba(212,168,83,0.4)');
+    g.addColorStop(0,'rgba(255,220,120,1)');
+    g.addColorStop(0.2,'rgba(212,168,83,0.5)');
+    g.addColorStop(0.5,'rgba(212,168,83,0.15)');
     g.addColorStop(1,'rgba(212,168,83,0)');
     ctx.fillStyle=g; ctx.fillRect(0,0,32,32);
     return new THREE.CanvasTexture(c);
 })();
 
 const pMat = new THREE.PointsMaterial({
-    map: pTex, size: 0.1, transparent: true, opacity: 0.5,
+    map: pTex, size: 0.08, transparent: true, opacity: 0.4,
     blending: THREE.AdditiveBlending, depthWrite: false, color: 0xd4a853
 });
 const particles = new THREE.Points(pGeo, pMat);
 scene.add(particles);
 const pPosAttr = particles.geometry.attributes.position;
 
-advanceLoad(5, '生成粒子...');
+advanceLoad(5, '生成金粉粒子...');
 
 // ============================================================
-//  Raycaster 交互
+//  薄雾粒子系统（v3.0 新增）
+// ============================================================
+const mistCount = 600;
+const mistGeo = new THREE.BufferGeometry();
+const mistPos = new Float32Array(mistCount * 3);
+const mistSizes = new Float32Array(mistCount);
+for(let i=0; i<mistCount; i++) {
+    mistPos[i*3] = (Math.random()-0.5)*32;
+    mistPos[i*3+1] = Math.random() * 0.6;
+    mistPos[i*3+2] = (Math.random()-0.5)*32;
+    mistSizes[i] = 0.3 + Math.random() * 0.8;
+}
+mistGeo.setAttribute('position', new THREE.BufferAttribute(mistPos, 3));
+mistGeo.setAttribute('size', new THREE.BufferAttribute(mistSizes, 1));
+
+const mistTex = (()=>{
+    const c=document.createElement('canvas'); c.width=64; c.height=64;
+    const ctx=c.getContext('2d');
+    const g=ctx.createRadialGradient(32,32,0,32,32,32);
+    g.addColorStop(0,'rgba(180,160,120,0.3)');
+    g.addColorStop(0.5,'rgba(180,160,120,0.1)');
+    g.addColorStop(1,'rgba(180,160,120,0)');
+    ctx.fillStyle=g; ctx.fillRect(0,0,64,64);
+    return new THREE.CanvasTexture(c);
+})();
+
+const mistMat = new THREE.PointsMaterial({
+    map: mistTex, size: 1.2, transparent: true, opacity: 0.06,
+    blending: THREE.AdditiveBlending, depthWrite: false, color: 0xd4c8a0
+});
+const mistParticles = new THREE.Points(mistGeo, mistMat);
+scene.add(mistParticles);
+const mistPosAttr = mistParticles.geometry.attributes.position;
+
+advanceLoad(5, '生成氛围薄雾...');
+
+// ============================================================
+//  Raycaster 交互（v3.0 升级）
 // ============================================================
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 let hoveredPanel = null;
-
-const clickablePanels = [mainPanel];
-scrollPanels.forEach(g => {
-    g.children.forEach(c => {
-        if(c.isMesh && c.geometry.type === 'PlaneGeometry' && c.material.map) {
-            clickablePanels.push(c);
-        }
-    });
-});
 
 renderer.domElement.addEventListener('click', (e) => {
     const rect = renderer.domElement.getBoundingClientRect();
@@ -912,22 +1116,66 @@ renderer.domElement.addEventListener('click', (e) => {
     raycaster.setFromCamera(mouse, camera);
     const hits = raycaster.intersectObjects(clickablePanels);
     if(hits.length > 0) {
-        // 找最近的面板
-        let idx = PATTERNS.length - 1;
-        for(let i=0; i<scrollPanels.length; i++) {
-            if(scrollPanels[i].children.includes(hits[0].object)) {
-                idx = Math.min(i, EXHIBITS.length-1);
-                break;
-            }
+        const obj = hits[0].object;
+        // 纹样放大镜 — 点击纹样展板进入细节视图
+        if(obj.userData && obj.userData.isPattern) {
+            const idx = obj.userData.patternIndex;
+            showPatternDetail(idx);
+            return;
         }
-        if(hits[0].object === mainPanel) idx = 1;
-        showExhibit(idx);
+        // 主展品 → 显示对应说明
+        if(obj.userData && obj.userData.isMain) {
+            showExhibit(1);
+            return;
+        }
     }
 });
-renderer.domElement.style.cursor = 'pointer';
+
+// 悬停高亮
+renderer.domElement.addEventListener('mousemove', (e) => {
+    const rect = renderer.domElement.getBoundingClientRect();
+    mouse.x = ((e.clientX - rect.left)/rect.width)*2 - 1;
+    mouse.y = -((e.clientY - rect.top)/rect.height)*2 + 1;
+    raycaster.setFromCamera(mouse, camera);
+    const hits = raycaster.intersectObjects(clickablePanels);
+    renderer.domElement.style.cursor = hits.length > 0 ? 'pointer' : 'default';
+});
 
 // ============================================================
-//  UI
+//  纹样放大镜（v3.0 新增）
+// ============================================================
+function showPatternDetail(idx) {
+    if(idx < 0 || idx >= PATTERNS.length) return;
+    const p = PATTERNS[idx];
+    const isAI = idx === PATTERNS.length - 1;
+
+    // 高分辨率重绘
+    const hdCanvas = generateBrocadeTexture(p.name, p.color, isAI, true);
+    const ctx = detailCanvas.getContext('2d');
+    detailCanvas.width = 2048;
+    detailCanvas.height = 2048;
+    ctx.clearRect(0, 0, 2048, 2048);
+    // 绘制放大纹样
+    ctx.drawImage(hdCanvas, 0, 0, 2048, 2048);
+
+    detailName.textContent = p.name;
+    detailMeaning.textContent = p.meaning + ' · ' + p.period;
+    detailDesc.textContent = p.desc;
+
+    detailOverlay.classList.add('show');
+}
+
+function closePatternDetail() {
+    detailOverlay.classList.remove('show');
+}
+
+detailClose.addEventListener('click', closePatternDetail);
+detailOverlay.addEventListener('click', (e) => {
+    if(e.target === detailOverlay) closePatternDetail();
+});
+
+// ============================================================
+//  UI 信息面板
 // ============================================================
 function showExhibit(idx) {
     const ex = EXHIBITS[Math.min(idx, EXHIBITS.length-1)];
@@ -935,6 +1183,7 @@ function showExhibit(idx) {
     infoTitle.textContent = ex.title;
     infoSubtitle.textContent = ex.subtitle;
     infoDesc.innerHTML = ex.desc.replace(/\n/g, '<br>');
+    infoTags.innerHTML = (ex.tags || []).map(t => `<span class="culture-tag">${t}</span>`).join('');
     infoOverlay.classList.add('show');
 }
 
@@ -943,7 +1192,6 @@ infoOverlay.addEventListener('click', (e) => {
     if(e.target === infoOverlay) infoOverlay.classList.remove('show');
 });
 
-// 导航
 document.querySelectorAll('#nav button').forEach(btn => {
     btn.addEventListener('click', () => {
         document.querySelectorAll('#nav button').forEach(b => b.classList.remove('active'));
@@ -956,7 +1204,7 @@ document.querySelectorAll('#nav button').forEach(btn => {
 });
 
 // ============================================================
-//  导览与工具
+//  导览与工具（v3.0 升级）
 // ============================================================
 let tourMode = false;
 let tourStep = 0;
@@ -964,21 +1212,50 @@ let tourProgress = 0;
 let isAutoRotate = false;
 let soundOn = false;
 
-// Audio Context
+// Audio — 五声音阶旋律（古风）
 let audioCtx = null;
+let audioGain = null;
+let audioNodes = [];
+
 function initAudio() {
     if(audioCtx) return;
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const osc = audioCtx.createOscillator();
-    osc.type = 'triangle';
-    osc.frequency.setValueAtTime(220, audioCtx.currentTime);
-    osc.frequency.linearRampToValueAtTime(440, audioCtx.currentTime + 2);
-    osc.frequency.linearRampToValueAtTime(330, audioCtx.currentTime + 4);
-    const gain = audioCtx.createGain();
-    gain.gain.setValueAtTime(0.02, audioCtx.currentTime);
-    gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 4);
-    osc.connect(gain).connect(audioCtx.destination);
-    osc.start(); osc.stop(audioCtx.currentTime + 4.5);
+    audioGain = audioCtx.createGain();
+    audioGain.gain.setValueAtTime(0.015, audioCtx.currentTime);
+    audioGain.connect(audioCtx.destination);
+
+    // 中国传统五声音阶（宫商角徵羽）— C大调
+    const pentatonic = [262, 294, 330, 392, 440, 524, 588, 660];
+    let noteTime = audioCtx.currentTime;
+
+    function scheduleNote() {
+        if(!soundOn || !audioCtx) return;
+        const freq = pentatonic[Math.floor(Math.random() * pentatonic.length)];
+        const osc = audioCtx.createOscillator();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, noteTime);
+        osc.frequency.exponentialRampToValueAtTime(freq * 1.01, noteTime + 0.1);
+
+        const noteGain = audioCtx.createGain();
+        noteGain.gain.setValueAtTime(0, noteTime);
+        noteGain.gain.linearRampToValueAtTime(0.5, noteTime + 0.05);
+        noteGain.gain.linearRampToValueAtTime(0.3, noteTime + 0.3);
+        noteGain.gain.linearRampToValueAtTime(0, noteTime + 0.6);
+
+        osc.connect(noteGain);
+        noteGain.connect(audioGain);
+        osc.start(noteTime);
+        osc.stop(noteTime + 0.6);
+
+        noteTime += 0.8 + Math.random() * 0.6;
+        if(noteTime < audioCtx.currentTime + 10) {
+            setTimeout(scheduleNote, (noteTime - audioCtx.currentTime) * 1000);
+        } else {
+            // Reschedule loop
+            setTimeout(() => { if(soundOn) scheduleNote(); }, 1000);
+        }
+    }
+    scheduleNote();
 }
 
 // 导览
@@ -994,7 +1271,7 @@ document.getElementById('btn-auto').addEventListener('click', () => {
     isAutoRotate = !isAutoRotate;
     document.getElementById('btn-auto').classList.toggle('active');
     controls.autoRotate = isAutoRotate;
-    controls.autoRotateSpeed = 0.8;
+    controls.autoRotateSpeed = 1.0;
 });
 
 // 音效
@@ -1004,18 +1281,34 @@ document.getElementById('btn-sound').addEventListener('click', () => {
     if(soundOn) initAudio();
 });
 
+// 截图（v3.0 新增）
+document.getElementById('btn-screenshot').addEventListener('click', () => {
+    // 渲染一帧确保最新
+    composer.render();
+    const link = document.createElement('a');
+    link.download = '金陵纹影-' + new Date().toISOString().slice(0,19).replace(/[:-]/g,'') + '.png';
+    link.href = renderer.domElement.toDataURL('image/png');
+    link.click();
+    // 闪光效果
+    flash.classList.add('active');
+    setTimeout(() => {
+        flash.classList.add('fade');
+        setTimeout(() => { flash.classList.remove('active','fade'); }, 500);
+    }, 100);
+});
+
 // 全屏
 document.getElementById('btn-fullscreen').addEventListener('click', () => {
     if(document.fullscreenElement) document.exitFullscreen();
     else document.documentElement.requestFullscreen();
 });
 
-// 音频初始化
-audioInit.addEventListener('click', () => {
+// 音频初始化按钮
+audioBtn.addEventListener('click', () => {
     initAudio();
     soundOn = true;
     document.getElementById('btn-sound').classList.add('active');
-    audioInit.style.display = 'none';
+    audioBtn.style.display = 'none';
 });
 
 // ============================================================
@@ -1029,7 +1322,7 @@ window.addEventListener('resize', () => {
 });
 
 // ============================================================
-//  动画循环
+//  动画循环（v3.0 增强）
 // ============================================================
 const clock = new THREE.Clock();
 
@@ -1037,40 +1330,70 @@ function animate() {
     requestAnimationFrame(animate);
 
     const t = clock.getElapsedTime();
-    const dt = Math.min(clock.getDelta(), 0.05);
+    let dt = Math.min(clock.getDelta(), 0.05);
+    if(dt <= 0) dt = 1/60;
 
-    // 粒子漂浮
+    // === 金粉粒子（升级运动轨迹）===
     const pos = pPosAttr.array;
     for(let i=0; i<particleCount; i++) {
-        pos[i*3+1] += Math.sin(t*0.2 + i*0.1) * 0.0005;
-        pos[i*3] += Math.cos(t*0.15 + i*0.07) * 0.0003;
-        if(pos[i*3+1] > 8) pos[i*3+1] = 0;
-        if(pos[i*3] > 14) pos[i*3] = -14;
-        if(pos[i*3] < -14) pos[i*3] = 14;
+        const i3 = i*3;
+        pos[i3+1] += Math.sin(t*0.3 + i*0.05) * 0.0008;
+        pos[i3] += Math.cos(t*0.2 + i*0.03 + pDrifts[i*2]) * 0.0004;
+        pos[i3+2] += Math.sin(t*0.15 + i*0.04 + pDrifts[i*2+1]) * 0.0003;
+        // 循环
+        if(pos[i3+1] > 8) { pos[i3+1] = 0; pos[i3] = (Math.random()-0.5)*30; pos[i3+2] = (Math.random()-0.5)*30; }
+        if(pos[i3] > 15) pos[i3] = -15;
+        if(pos[i3] < -15) pos[i3] = 15;
+        if(pos[i3+2] > 15) pos[i3+2] = -15;
+        if(pos[i3+2] < -15) pos[i3+2] = 15;
     }
     pPosAttr.needsUpdate = true;
 
-    // 展板发光脉动
+    // === 薄雾飘动 ===
+    const mistPosArr = mistPosAttr.array;
+    for(let i=0; i<mistCount; i++) {
+        mistPosArr[i*3] += Math.sin(t*0.05 + i*0.01) * 0.0005;
+        mistPosArr[i*3+2] += Math.cos(t*0.04 + i*0.008) * 0.0005;
+        if(mistPosArr[i*3] > 16) mistPosArr[i*3] = -16;
+        if(mistPosArr[i*3] < -16) mistPosArr[i*3] = 16;
+        if(mistPosArr[i*3+2] > 16) mistPosArr[i*3+2] = -16;
+        if(mistPosArr[i*3+2] < -16) mistPosArr[i*3+2] = 16;
+    }
+    mistPosAttr.needsUpdate = true;
+
+    // === 展板发光脉动 ===
     scrollPanels.forEach((g, i) => {
         g.children.forEach(c => {
             if(c.isMesh && c.material && c.material.emissiveIntensity !== undefined) {
-                c.material.emissiveIntensity = 0.03 + 0.025 * Math.sin(t*0.7 + i*0.4);
+                c.material.emissiveIntensity = 0.03 + 0.025 * Math.sin(t*0.6 + i*0.4);
             }
         });
     });
     mainPanel.material.emissiveIntensity = 0.05 + 0.04 * Math.sin(t*0.5);
 
-    // 灯笼微晃
-    lanternPos.forEach((p, i) => {
-        // 找对应的灯笼 - 懒得建索引了，直接用scene.children查找
+    // === 灯笼摇曳（v3.0 新增） ===
+    lanternData.forEach((ld, i) => {
+        ld.group.rotation.z = Math.sin(t*0.7 + ld.phase) * 0.025;
+        ld.group.rotation.x = Math.sin(t*0.5 + ld.phase*1.2) * 0.015;
+        // 烛光闪烁
+        const glowMesh = ld.group.children.find(c =>
+            c.isMesh && c.material && c.material.type === 'MeshBasicMaterial'
+        );
+        if(glowMesh && glowMesh.material) {
+            glowMesh.material.opacity = 0.25 + 0.18 * Math.sin(t*1.8 + ld.phase*1.5)
+                + 0.05 * Math.sin(t*3.7 + ld.phase*0.7);
+        }
     });
 
-    // 导览模式
+    // === 氛围光微动 ===
+    warmGlow.intensity = 0.35 + 0.1 * Math.sin(t*0.3);
+
+    // === 导览模式 ===
     if(tourMode) {
         const tourPoints = EXHIBITS.map(e => new THREE.Vector3(e.pos[0]*1.5, e.pos[1]+0.5, e.pos[2]*1.5));
         const lookPoints = EXHIBITS.map(e => new THREE.Vector3(e.pos[0], e.pos[1], e.pos[2]));
 
-        const duration = 8;
+        const duration = 10;
         tourProgress += dt / duration;
         if(tourProgress >= 1) {
             tourProgress = 0;
@@ -1079,14 +1402,11 @@ function animate() {
 
         const fromIdx = tourStep;
         const toIdx = (tourStep + 1) % tourPoints.length;
-        const p1 = lookPoints[fromIdx];
         const p2 = lookPoints[toIdx];
 
-        controls.target.lerp(p2, 0.02);
-        const camTarget = new THREE.Vector3().lerpVectors(
-            tourPoints[fromIdx], tourPoints[toIdx], tourProgress
-        );
-        camera.position.lerp(camTarget, 0.03);
+        controls.target.lerp(p2, 0.015);
+        const camTarget = new THREE.Vector3().lerpVectors(tourPoints[fromIdx], tourPoints[toIdx], tourProgress);
+        camera.position.lerp(camTarget, 0.025);
     }
 
     composer.render();
@@ -1096,22 +1416,24 @@ function animate() {
 advanceLoad(5, '启动完成！');
 advanceLoad(100, '加载完成');
 
-// ======== 启动动画 ========
 animate();
 
 // ======== 键盘快捷键 ========
 document.addEventListener('keydown', (e) => {
-    if(e.key === 'Escape') infoOverlay.classList.remove('show');
+    if(e.key === 'Escape') {
+        if(detailOverlay.classList.contains('show')) closePatternDetail();
+        else infoOverlay.classList.remove('show');
+    }
     if(e.key === 'f' || e.key === 'F') {
         if(document.fullscreenElement) document.exitFullscreen();
         else document.documentElement.requestFullscreen();
     }
 });
 
-console.log('%c🏮 金陵纹影 v2.0','color:#d4a853;font-size:20px;font-weight:bold');
+console.log('%c🏮 金陵纹影 v3.0','color:#d4a853;font-size:20px;font-weight:bold');
 console.log('南京云锦数字化3D交互展示');
-console.log('佳豪队 · 南京晓庄学院');
-
+console.log('佳豪队 · 南京晓庄学院 · 江苏赛区');
+console.log('v3.0 升级：镜面地板 | 薄雾 | 动态灯笼 | 花格窗 | 纹样放大镜 | 五声音阶 | 截图');
 </script>
 </body>
 </html>
